@@ -1,50 +1,28 @@
-# FMX Freeride
+# FMX Freeride — iPhone 3D prototype
 
-Free browser-based freestyle motocross game prototype for iPhone and desktop.
+The project is intentionally narrow: **one motocross bike, one FMX rider, one steel takeoff ramp and one sculpted dirt landing.** No new areas or additional jumps until the rider and lander look believable.
 
-**Current direction: one jump only. Get the motorbike and rider looking believable before adding new content.**
+## Version 0.8: rider + dirt lander
 
-## What's new in 0.6 — an actual 3D model pipeline
+- Rebuilt the **single landing mound** as a detailed 3D dirt surface, with soft shoulder transitions into the surrounding terrain, varying surface normals, organic dirt colour and subtle tyre marks. The same surface-height function is used for collision/landing.
+- Refined the **procedural rider** with tapered anatomy, shoulder guards, joint folds, jersey back number graphics, gear seams, and a more active motocross riding posture that adjusts with speed and airtime.
+- Kept the proper 3D motorbike model loader, original three FMX tricks and iPhone-only touchscreen controls.
+- The bike is shown from a closer, adjustable mobile chase camera with an HD / smooth option.
 
-The old all-procedural dirt bike looked too much like Minecraft. This version attempts to load an original, licensed detailed 3D motorcycle model with real mesh contours and authored materials. It uses the existing ride and trick mechanics rather than replacing the game.
+## Play on iPhone
 
-The browser tries these **CC0 / public-domain** assets in order:
-
-1. **Higher-detail dirt motorcycle** — Innerscene, 108,138 tris, ~6.7 MB, 815 separate meshes. Source: https://www.innerscene.com/tools/library/3d-parts/dirt-motorcycle-0a9c8589 — CDN API: https://www.innerscene.com/api/library/dirt-motorcycle-0a9c8589/download . This cross-origin download might fail or run slowly on phones.
-2. **Mobile-compatible backup** — Trials competition bike by 3DAssets.dev, 6,288 tris, ~308 KB, CC0, +Y up and +Z forward. Reliable public CORS-enabled GLB: https://cdn.3dassets.dev/assets/15417/v1/model.glb — source: https://3dassets.dev/assets/motorcycle-racing-and-street-bikes-trials-bike-5643520e .
-3. **Offline loading fallback** — our prior hand-built motorcycle only when both model downloads fail; the game should remain playable.
-
-**On the game screen, the status underneath the FMX FREERIDE title reports what actually loaded:** DETAILED 3D DIRT BIKE, OPTIMISED 3D DIRT BIKE, or PROCEDURAL BIKE • MODEL UNAVAILABLE. Do not describe the model as upgraded unless its status shows it loaded.
-
-Real model integration also rotates source model axes based on bounding-box proportions, normalizes the scale to the 2.2 m motocross bike and moves the existing articulated rider into a more realistic riding position. This is a static model swap, not yet true suspension or a skinned rider.
-
-## Work in progress
-
-- **The rider is still a procedural articulated character**, not a motion-captured rider. Proper helmet, jersey, pants, body shapes and animation need a licensed rigged character model and custom riding animations.
-- Neither 3D model was play-tested on the user's specific iPhone as part of this commit; wait for feedback. CORS failures fall back gracefully.
-- Jump motion, backflip, whip and Superman remain simplified arcade physics and should not be used as real FMX jump calculations.
-- The high-detail model is too complex to guarantee smooth performance on every phone. We will need to optimise draw calls / materials or bundle an LOD model for future versions.
-
-## Play
-
-GitHub Pages (public GitHub repository, no additional paid host needed):
 https://brendojones.github.io/fmx-freeride/
 
-Landscape orientation strongly recommended on mobile.
+Open in Safari, rotate the phone sideways, and use the on-screen controls. Drag over the scenery to adjust camera direction. Updates to the same public GitHub Pages website don't require installing an app or downloading a ZIP.
 
-| Action | iPhone | Desktop |
-| --- | --- | --- |
-| Throttle | THROTTLE | W / Up |
-| Brake | BRAKE | S / Down |
-| Steering | Arrows | A / D |
-| Backflip | BACKFLIP | Space |
-| Superman | SUPERMAN | Q |
-| Whip | WHIP | E |
-| Camera | CAMERA | C |
-| Reset | RESET | R |
+### Graphics limitations (important)
+The rider is still a **procedurally built, articulated model** and is not equivalent to a professional modelled, rigged FMX rider from a console game. The highest realistic visual-quality improvement would be a licensed, detailed 3D rider (GLB/FBX) with genuine skeletal animations and gear textures, adapted to this bike in a separate modelling workflow. No paid asset has been purchased or approved.
 
-## Technology and licensing
+The motorcycle model loader attempts a public-domain detailed dirt bike, then a more mobile-friendly public-domain backup; if remote loading fails, the original procedural fallback stays playable. Status text under the game's title shows which model loads.
 
-Three.js WebGL, GLTFLoader, dynamic model replacement with fallbacks, authored PBR materials, one FMX steel launch and dirt landing. The CC0 third-party motorcycle assets above may be used without attribution; their source links are retained here as documentation.
+Current bike handling, trick animations and lander geometry remain entertainment-only and **must not be used for real FMX jump measurements**.
 
-This is an original prototype and contains no copied assets or code from MX vs ATV, MX Bikes or Supercross games.
+## Technical details
+Three.js WebGL, glTF Loader, physically based materials, generated decals and dirt textures, collision height field, touchscreen pointer controls. One static HTML page hosted free on GitHub Pages. No account needed to play.
+
+Model sources: Innerscene CC0 Dirt Motorcycle https://www.innerscene.com/tools/library/3d-parts/dirt-motorcycle-0a9c8589 , 3DAssets.dev backup https://3dassets.dev/ . No game graphics, animations or code copied from MX vs ATV or other commercial games.
