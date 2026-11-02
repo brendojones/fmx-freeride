@@ -1,41 +1,45 @@
 # FMX Freeride
 
-An original, mobile-first 3D freestyle motocross **graphics and riding prototype**. The aim is a realistic-looking Australian FMX training compound, not a huge open-world game.
+A free, original, mobile-first 3D freestyle motocross experiment. This project deliberately focuses on **one jump, one bike, and one rider** before expanding the game.
 
-## Features in prototype 0.4
-- One dedicated compound with a steel FMX takeoff and dirt landing
-- Selectable 75 ft (22.86 m) or 100 ft (30.48 m) landing gap
-- Backflip, Superman and whip controls
-- Rider pose animation for Superman; body/bike rotation for backflip and whip
-- Mobile touchscreen and desktop controls
-- Procedural terrain texture, steel frame details, riding camera and simple trick feedback
+## Current version: graphics pass 0.5
+
+The latest build prioritises the rider and the bike over extra game modes:
+- One steel FMX takeoff ramp and one dirt landing
+- Sculpted plastic fairings instead of plain box panels
+- Detailed engine, side panel graphics, wheel hubs, spokes, rear sprockets, tire tread and exhaust
+- More detailed helmet with chin guard, goggle lens, vents and straps
+- Rider jersey graphics, knee protectors, boots, pads and articulated trick poses
+- A closer third-person camera for a better view of the rider and bike
+- Backflip, Superman and whip; no extra tricks or new tracks
+
+This is still a **custom procedural browser prototype**, not photorealistic racing-game footage. The next major quality leap will require importing professionally modeled and optimised GLB bike and rider assets, with a proper animated character skeleton, plus testing on a real iPhone.
 
 ## Controls
-| Action | Mobile | Desktop |
+
+| Action | iPhone / Android | Computer |
 | --- | --- | --- |
-| Accelerate | THROTTLE | W or ↑ |
-| Brake | BRAKE | S or ↓ |
-| Steer | ◀ / ▶ | A / D or ← / → |
+| Throttle | THROTTLE | W / Up |
+| Brake | BRAKE | S / Down |
+| Steer | ◀ / ▶ | A / D |
 | Backflip | BACKFLIP | Space |
 | Superman | SUPERMAN | Q |
 | Whip | WHIP | E |
-| Reset | RESET | R |
-| Toggle gap | 75 FT / 100 FT | G |
 | Camera | CAMERA | C |
+| Reset | RESET | R |
 
-## Play it on iPhone / desktop
-Enable **GitHub Pages** in this repository's **Settings > Pages**.
-Choose **Deploy from a branch**, select **main** and **/(root)** and save.
-Once published, the game is served from the same website address after each commit.
-Open the Pages URL in Safari or a desktop browser. Landscape orientation is recommended on mobile.
+## Live website
 
-## Development direction
-Focus on real-looking bike and rider assets, more believable trick poses, realistic steel ramp and dirt landing, and improved bike physics before adding new locations or game modes.
+The static HTML game is published through GitHub Pages (Settings → Pages, Deploy from main / root).
 
-## Current limitations
-Prototype 0.4 uses original geometry and textures made with Three.js. It does **not yet** include a photorealistic imported 3D dirt bike or a mocap-rigged rider, and handling is **not** validated against real-world FMX jump trajectories. This is a game, not a jumping or rider-safety calculator.
+https://brendojones.github.io/fmx-freeride/
 
-## Technology
-Static single-page Three.js ES-module web app. Three.js loads from a public CDN. No server, analytics, paid API or sign-in required for players.
+No paid hosting or account is required to play, and there are no game purchases. The game currently loads Three.js from a public CDN.
 
-No trademarked MX vs ATV or other game's source materials are used.
+## Technical and safety notes
+
+Three.js ES module, original mesh silhouettes, generated canvas decals and procedural materials. The ramp and handling are for entertainment and not validated against real-world FMX jumps or riding physics. This project does not include game assets copied from MX vs ATV, MX Bikes or Supercross.
+
+## Future art workflow
+
+Research free-to-use or commissioned high-quality GLB dirt bike models, character rigs, PBR textures and helmet/gear meshes; only replace placeholder geometry once licensing and mobile performance are verified.
