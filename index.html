@@ -94,13 +94,16 @@ const wheels=[];function wheel(z){const group=new THREE.Group();group.position.s
 wheel(-1.08);wheel(1.10);
 const frameNodes=[[0,1.15,-.3],[0,.84,.35],[0,1.48,.4],[0,1.1,-.8],[0,1.16,.6]];
 for(let i=0;i<frameNodes.length-1;i++)pipe(chassis,frameNodes[i],frameNodes[(i+1)%frameNodes.length],.08,chrome);
-const motor=box(chassis,.6,.55,.6,black,0,1.08,-.15);const motorHead=add(chassis,new THREE.CylinderGeometry(.24,.29,.45,12),steel,0,1.33,-.15);motorHead.rotation.z=Math.PI/2;
+const motor=add(chassis,new THREE.SphereGeometry(.35,18,14),black,0,1.10,-.14);motor.scale.set(1.05,.82,1.07);
+const motorHead=add(chassis,new THREE.CylinderGeometry(.25,.28,.55,18),steel,0,1.32,-.12);motorHead.rotation.z=Math.PI/2;
+for(let side of [-1,1]){const caseCover=add(chassis,new THREE.CylinderGeometry(.23,.23,.038,20),chrome,side*.34,1.10,-.14);caseCover.rotation.z=Math.PI/2;for(let j=0;j<6;j++){const a=j/6*Math.PI*2;add(chassis,new THREE.SphereGeometry(.022,8,6),steel,side*.37,1.10+Math.sin(a)*.17,-.14+Math.cos(a)*.17)}}
+for(let i=0;i<7;i++){const fin=box(chassis,.63,.026,.38,chrome,0,1.16+i*.052,-.12);fin.rotation.y=.02*i}
 for(const x of [-.23,.23]){pipe(chassis,[x,1.43,.7],[x,.64,1.13],.063,chrome);pipe(chassis,[x,1.2,-.65],[x,.6,-1.08],.045,steel)}
 // Fuel tank is integrated into the sculpted bodywork.
 const seat=add(chassis,new THREE.SphereGeometry(.48,18,12),black,0,1.73,-.70);seat.scale.set(.70,.16,1.32);
 // Shrouds have been replaced with sculpted fairing profiles.
-const frontGuard=box(chassis,.6,.11,1.13,bikeBlue,0,1.22,1.12);frontGuard.visible=false;
-const rearGuard=box(chassis,.62,.11,1.2,bikeWhite,0,1.54,-1.18);rearGuard.visible=false;
+// Front and rear guards are sculpted custom geometry below.
+
 pipe(chassis,[-.62,2.0,.99],[.62,2.0,.99],.045,chrome);for(const x of [-.39,.39])pipe(chassis,[x,1.52,1.02],[x,2,.99],.036,steel);
 
 function curvedFender(target,wheelZ,color,start,end,width,rad){
@@ -119,7 +122,7 @@ function curvedFender(target,wheelZ,color,start,end,width,rad){
 curvedFender(chassis,1.1,bikeBlue,-.78,.90,.60,.79);
 curvedFender(chassis,-1.08,bikeWhite,-1.0,.82,.60,.73);
 
-const plate=panelPlaceHolder();function panelPlaceHolder(){const m=box(chassis,.52,.48,.095,satinWhite,0,1.71,1.13);m.rotation.x=-.09;return m}
+const plate=box(chassis,.52,.48,.095,bikeWhite,0,1.71,1.13);plate.rotation.x=-.09;
 
 // Rider is articulated: a simple anatomical skeleton rather than a sliding rigid statue.
 // These reusable capsule joints allow a genuine Superman pose and return-to-bike animation.
