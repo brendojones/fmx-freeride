@@ -584,7 +584,23 @@ for(const side of [-1,1]){
 for(let i=0;i<3;i++){const vent=box(rig.helmet,.045,.017,.11,helmetInset,(i-1)*.095,.275,.23);vent.rotation.x=-.4}
 goggles.material=visorGlass;
 const strap=add(rig.helmet,new THREE.TorusGeometry(.293,.025,8,34),helmetInset,0,.018,0);strap.rotation.y=Math.PI/2;
-const backShell=add(rig.helmet,new THREE.SphereGeometry(.28,16,12),helmetTrim,0,.12,-.07);backShell.scale.set(.68,.29,1.05);
+const backShell=add(rig.helmet,new THREE.SphereGeometry(.28,24,16),helmetTrim,0,.12,-.07);backShell.scale.set(.68,.29,1.05);
+peak.visible=false;
+// Sculpted MX peak with an extended front silhouette, rather than a sphere.
+const peakPath=new THREE.Shape();
+peakPath.moveTo(.02,.07);peakPath.lineTo(.42,.12);peakPath.lineTo(.64,.08);
+peakPath.quadraticCurveTo(.42,.008,.02,.015);peakPath.closePath();
+const peakGeometry=new THREE.ExtrudeGeometry(peakPath,{depth:.34,bevelEnabled:true,bevelThickness:.02,bevelSize:.015,bevelSegments:3});
+peakGeometry.rotateY(-Math.PI/2);
+const mxPeak=add(rig.helmet,peakGeometry,helmetTrim,.17,.19,.025);
+mxPeak.rotation.x=-.08;
+// Tapered jawline and side vents to give the helmet a motocross silhouette.
+for(const side of [-1,1]){
+ const guard=add(rig.helmet,new THREE.SphereGeometry(.17,18,12),helmetShell,side*.21,-.16,.14);
+ guard.scale.set(.55,.74,.70);
+ const vent=add(rig.helmet,new THREE.TorusGeometry(.10,.014,7,20),helmetInset,side*.323,-.025,-.08);
+ vent.rotation.y=Math.PI/2;
+}
 // Jersey/armour pattern: rider's back is the most frequently viewed surface.
 const chestDecal=paintDecal('logo');
 sticker(rig.torso,chestDecal,.40,.44,0,.04,-.315,Math.PI);
