@@ -160,7 +160,7 @@ let dustTimer=0;
 function updateDust(q,dt){
  dustTimer-=dt;
  if(!q.air && !q.crashed && q.speed>3 && dustTimer<=0 && started){
-  dustTimer=graphicsHigh?.115:.19;
+  dustTimer=graphicsHigh ? 0.115 : 0.19;
   const p=dustPool.find(item=>item.life<=0);
   if(p){p.life=.9;p.sprite.visible=true;
    p.sprite.position.set(q.x-Math.sin(q.yaw)*1.35,surface(q.z,q.x)+.38,q.z-Math.cos(q.yaw)*1.35);
