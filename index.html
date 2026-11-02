@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#101715"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>FMX Freeride — Prototype 0.3</title>
+<style>
+*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#121a18;color:white;font-family:system-ui,-apple-system,Arial,sans-serif;touch-action:none}canvas{display:block;touch-action:none}#game{position:absolute;inset:0}#hud{position:absolute;inset:0;pointer-events:none}.top{position:absolute;top:max(12px,env(safe-area-inset-top));left:18px;right:18px;display:flex;justify-content:space-between;gap:15px;text-shadow:0 2px 8px #0009}.brand{font-size:19px;font-weight:950;letter-spacing:.02em;font-style:italic}.brand b{color:#f5962f}.sub{font-size:9px;font-weight:800;letter-spacing:.18em;color:#d6dacb}.stats{text-align:right}.stats strong{font-size:32px;line-height:1;font-variant-numeric:tabular-nums}.stats span{font-size:11px;font-weight:800}.stats small{display:block;color:#f8b96d;font-weight:800;letter-spacing:.12em}#message{position:absolute;top:24%;width:100%;text-align:center;font-weight:900;font-size:22px;text-shadow:0 2px 12px #000;opacity:0;transition:opacity .25s;padding:0 25px}#message.visible{opacity:1}.toolbar{pointer-events:auto;position:absolute;top:85px;left:18px;display:flex;gap:7px}.toolbar button,.touch button{color:white;border:1px solid #ffffff53;background:#15211dbd;box-shadow:0 4px 18px #0005;backdrop-filter:blur(8px);font-weight:900;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}.toolbar button{padding:10px 13px;border-radius:8px;font-size:10px;letter-spacing:.07em}.touch{pointer-events:auto;position:absolute;bottom:max(20px,env(safe-area-inset-bottom));left:18px;right:18px;display:flex;align-items:end;justify-content:space-between;gap:12px}.touch .group{display:flex;gap:9px;align-items:end}.touch button{border-radius:50%;height:68px;width:68px;font-size:12px}.touch button.pressed{background:#f28b26e3;border-color:#ffe1b3;transform:scale(.97)}.touch .gas{height:96px;width:96px;background:#e7771bd6}.touch .flip{height:75px;width:75px;background:#303f35d9}.touch .brake{height:70px;width:70px}.touch .dir{font-size:24px}.bottom-note{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:9px;color:#ffffff8f;white-space:nowrap}.modal{position:absolute;inset:0;background:linear-gradient(110deg,#0b1411e8,#111b1bd7 45%,#17221ca9);display:grid;place-items:center;padding:22px;z-index:10}.panel{max-width:550px;width:100%;padding:24px 30px;border-left:5px solid #f5952f;background:#0d1815ce;box-shadow:0 15px 70px #0009}.eyebrow{color:#f4ae6b;font-size:11px;letter-spacing:.2em;font-weight:900}.panel h1{font-style:italic;font-size:clamp(43px,9vw,83px);line-height:.83;letter-spacing:-.07em;margin:16px 0 23px;font-weight:1000}.panel h1 em{color:#f3932e;font-style:inherit}.panel p{font-size:16px;line-height:1.5;color:#e1e7dd;max-width:420px}.start{border:0;background:#ee8b25;color:#10130f;padding:16px 28px;border-radius:5px;font-weight:950;font-size:16px;letter-spacing:.08em;margin:14px 0;cursor:pointer}.panel small{display:block;font-size:11px;line-height:1.7;color:#b6c5ba}.panel .disclaimer{color:#94a19b;margin-top:13px}.hidden{display:none!important}#error{position:absolute;inset:0;background:#131715;z-index:20;padding:40px;font-size:18px}#rotate{display:none;position:absolute;top:53%;left:50%;transform:translate(-50%,-50%);background:#101914d9;padding:12px 18px;border-radius:8px;font-size:13px;text-align:center;z-index:3;pointer-events:none}@media (orientation:portrait) and (max-width:700px){#rotate{display:block}.touch button{width:56px;height:56px}.touch .gas{width:75px;height:75px}.touch .flip{width:65px;height:65px}.touch .brake{width:60px;height:60px}.toolbar{top:73px;left:12px}.toolbar button{padding:8px}}@media (max-height:440px){.top{top:7px}.toolbar{top:57px}.touch{bottom:9px}.touch button{width:55px;height:55px}.touch .gas{height:70px;width:70px}.touch .flip{height:62px;width:62px}.touch .brake{height:56px;width:56px}.bottom-note{display:none}.panel{padding:12px 22px}.panel h1{font-size:45px;margin:8px 0}.panel p{font-size:12px;margin:7px 0}.start{padding:10px 20px;margin:7px 0}.panel small{font-size:9px}.panel .disclaimer{display:none}}
+</style>
+</head><body>
+<div id="game"></div>
+<div id="hud">
+<div class="top"><div><div class="brand"><b>FMX</b> FREERIDE</div><div class="sub">AUSTRALIAN PRACTICE COMPOUND • V0.3</div></div><div class="stats"><strong id="speed">0</strong> <span>KM/H</span><small id="gapLabel">75 FT JUMP</small><small id="tricks">CLEAN LANDINGS: 0</small></div></div>
+<div id="message" role="status" aria-live="polite"></div>
+<div class="toolbar"><button id="gap">75 FT / 100 FT</button><button id="camera">CAMERA</button><button id="reset">RESET</button></div>
+<div class="touch"><div class="group"><button class="dir" data-control="left">◀</button><button class="dir" data-control="right">▶</button></div><button class="flip" data-control="flip">FLIP</button><div class="group"><button class="brake" data-control="brake">BRAKE</button><button class="gas" data-control="gas">THROTTLE</button></div></div>
+<div class="bottom-note">Prototype physics • Real-scale gaps • Turn sideways for best results</div></div>
+<div id="rotate">↻ Rotate your phone to landscape for the best ride</div>
+<div id="welcome" class="modal"><div class="panel"><div class="eyebrow">ORIGINAL 3D FREESTYLE MOTOCROSS</div><h1>FMX<br><em>FREERIDE.</em></h1><p>One compound. Two jump distances. Full throttle. Throw a backflip and stick the landing.</p><button class="start" id="start">START RIDING →</button><small>iPhone: Touch controls. Desktop: W/↑ throttle, S/↓ brake, A/D steer, Space backflip, R reset, G change gap, C camera.</small><small class="disclaimer">Early playable prototype — simplified bike physics and original procedural 3D artwork. Not a real bike simulator.</small></div></div>
+<div id="error" class="hidden"><h2>Can't load the 3D game</h2><p>Please check your internet connection, then reload the page in Safari or Chrome.</p></div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+const $=id=>document.getElementById(id), scene=new THREE.Scene();scene.background=new THREE.Color('#a9c3cf');scene.fog=new THREE.FogExp2('#bbc7bd',0.0031);
+const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,700);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.22;$('game').appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xdfefff,0x746951,2.05));const sun=new THREE.DirectionalLight(0xffe1b6,3.1);sun.position.set(-65,115,22);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-140;sun.shadow.camera.right=140;sun.shadow.camera.top=155;sun.shadow.camera.bottom=-115;sun.shadow.normalBias=.035;scene.add(sun);
+const mat=(color,roughness=1,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
+const dirt=mat('#956d4d'),dirtLight=mat('#b58b62'),grass=mat('#647351'),darkGrass=mat('#526a46'),steel=mat('#636e72',.46,.7),chrome=mat('#b4b9ba',.25,.75),rubber=mat('#151a1b'),black=mat('#252c2a'),bikeBlue=mat('#096eb1',.38,.23),bikeWhite=mat('#e0e5e2',.45),orange=mat('#f58b23',.47),skin=mat('#d5a17d'),gear=mat('#1b272c'),goggle=mat('#171c20',.15,.25),helmet=mat('#e9ecdd',.3);
+const add=(parent,geo,material,x=0,y=0,z=0,shadow=true)=>{const obj=new THREE.Mesh(geo,material);obj.position.set(x,y,z);obj.castShadow=shadow;obj.receiveShadow=true;parent.add(obj);return obj};
+const box=(parent,w,h,d,m,x,y,z)=>add(parent,new THREE.BoxGeometry(w,h,d),m,x,y,z);
+const sphere=(parent,r,m,x,y,z,w=16,h=12)=>add(parent,new THREE.SphereGeometry(r,w,h),m,x,y,z);
+function pipe(parent,a,b,r,m){const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b),delta=B.clone().sub(A);const mesh=add(parent,new THREE.CylinderGeometry(r,r,delta.length(),8),m,...A.clone().add(B).multiplyScalar(.5).toArray());mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());return mesh}
+const rnd=(s)=>{const v=Math.sin(s*127.1+78.2)*43758.5453;return v-Math.floor(v)};
+const terrain=new THREE.PlaneGeometry(440,540,100,115);terrain.rotateX(-Math.PI/2);let pos=terrain.attributes.position;const cols=[];for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),d=Math.abs(x);const base=.16*Math.sin(x*.09)*Math.cos(z*.065);const edge=Math.max(0,(d-18)/55);const yy=base+edge*edge*(2+Math.sin(z*.038)*2.2)+Math.sin(x*.28+z*.15)*edge*.18;pos.setY(i,yy);const k=rnd(i+2);let c=new THREE.Color(d<19?'#9d7958':(k>.54?'#798459':'#6a7952'));c.multiplyScalar(.85+k*.24);cols.push(c.r,c.g,c.b)}terrain.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));terrain.computeVertexNormals();const terrainMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:1});add(scene,terrain,terrainMat,0,0,85,false).receiveShadow=true;
+function surface(z,x){if(Math.abs(x)<2.15&&z>=61&&z<=75){const t=(z-61)/14;return 4.45*(t*t*(3-2*t));}if(z>=landingStart&&z<=landingStart+55&&Math.abs(x)<7){let t=z-landingStart;return t<15?1.1+(4.8-1.1)*(t/15):Math.max(.07,4.8-(t-15)*4.7/40)}return 0}
+let gapFt=75,landingStart=75+22.86;
+function ramp(){const g=new THREE.Group();scene.add(g);const segments=28;const vs=[],idx=[];for(let j=0;j<=segments;j++){const z=61+j*14/segments,y=4.45*Math.pow(j/segments,2)*(3-2*j/segments);for(const x of [-2.15,2.15])vs.push(x,y+.05,z)}for(let j=0;j<segments;j++){const k=j*2;idx.push(k,k+2,k+1,k+1,k+2,k+3)}const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(vs,3));geo.setIndex(idx);geo.computeVertexNormals();let deck=add(g,geo,steel,0,0,0);deck.material.side=THREE.DoubleSide;for(const x of [-2,2]){for(let j=0;j<12;j++){const z=61+j*1.15,h=surface(z,0);pipe(g,[x,0,z],[x,h,z],.048,chrome)}pipe(g,[x,0,61],[x,4.45,75],.07,chrome)}for(let j=0;j<7;j++){let z=61+j*2.2;pipe(g,[-2.2,0,z],[2.2,0,z],.05,steel)}for(let j=0;j<16;j++){let z=61+j*.9;pipe(g,[-2.15,surface(z,0)+.04,z],[2.15,surface(z,0)+.04,z],.012,chrome)}return g}
+ramp();
+let landingMesh=new THREE.Group();scene.add(landingMesh);
+function rebuildLanding(){while(landingMesh.children.length){let o=landingMesh.children.pop();o.parent=null;o.geometry?.dispose()}const steps=55,verts=[],ind=[];for(let j=0;j<=steps;j++){let z=landingStart+j;for(const x of [-8,8])verts.push(x,surface(z,0)+.04,z)}for(let j=0;j<steps;j++){let i=j*2;ind.push(i,i+2,i+1,i+1,i+2,i+3)}const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));geo.setIndex(ind);geo.computeVertexNormals();let mesh=add(landingMesh,geo,dirtLight,0,0,0);mesh.material.side=THREE.DoubleSide;for(let z=landingStart;z<=landingStart+55;z+=4){for(let x of [-7.7,7.7]){let h=surface(z,0);box(landingMesh,.25,.3,2,dirt,x,h-.1,z)}}}
+rebuildLanding();
+for(let i=0;i<130;i++){const x=(rnd(i*5)-.5)*390,z=(rnd(i*9+1)-.5)*480+85;if(Math.abs(x)<22)continue;const height=2.8+rnd(i+17)*5;const trunk=add(scene,new THREE.CylinderGeometry(.12,.2,height*.45,6),mat('#665344'),x,height*.22,z,false);trunk.castShadow=false;const foliage=add(scene,new THREE.ConeGeometry(height*.33,height*.83,7),i%3?grass:darkGrass,x,height*.7,z,false);foliage.castShadow=false}
+for(let i=0;i<18;i++){const x=(i%2?1:-1)*(11+rnd(i)*12),z=(i*17)%230-30;const rock=add(scene,new THREE.DodecahedronGeometry(.55+rnd(i+10)*1,0),mat(i%2?'#6d675d':'#867668'),x,.33,z,false);rock.scale.y=.48}
+for(let i=0;i<9;i++){const z=35+i*15;pipe(scene,[-18,0,z],[-18,1.3,z],.09,steel);pipe(scene,[18,0,z],[18,1.3,z],.09,steel)}for(const x of [-18,18])pipe(scene,[x,1.3,35],[x,1.3,160],.06,steel);
+const bike=new THREE.Group();scene.add(bike);const chassis=new THREE.Group();bike.add(chassis);
+const wheels=[];function wheel(z){const group=new THREE.Group();group.position.set(0,.59,z);chassis.add(group);const tire=add(group,new THREE.TorusGeometry(.53,.115,12,38),rubber);tire.rotation.y=Math.PI/2;const rim=add(group,new THREE.TorusGeometry(.37,.028,8,32),chrome);rim.rotation.y=Math.PI/2;const disc=add(group,new THREE.CylinderGeometry(.17,.17,.075,20),steel);disc.rotation.z=Math.PI/2;for(let i=0;i<16;i++){const a=i*Math.PI/8;pipe(group,[0,0,0],[0,Math.sin(a)*.37,Math.cos(a)*.37],.012,chrome)}wheels.push(group)}
+wheel(-1.08);wheel(1.10);
+const frameNodes=[[0,1.15,-.3],[0,.84,.35],[0,1.48,.4],[0,1.1,-.8],[0,1.16,.6]];
+for(let i=0;i<frameNodes.length-1;i++)pipe(chassis,frameNodes[i],frameNodes[(i+1)%frameNodes.length],.08,chrome);
+const motor=box(chassis,.6,.55,.6,black,0,1.08,-.15);const motorHead=add(chassis,new THREE.CylinderGeometry(.24,.29,.45,12),steel,0,1.33,-.15);motorHead.rotation.z=Math.PI/2;
+for(const x of [-.23,.23]){pipe(chassis,[x,1.43,.7],[x,.64,1.13],.063,chrome);pipe(chassis,[x,1.2,-.65],[x,.6,-1.08],.045,steel)}
+const tank=add(chassis,new THREE.SphereGeometry(.48,20,12),bikeBlue,0,1.65,.2);tank.scale.set(.94,.48,1.7);
+const seat=box(chassis,.67,.12,.98,black,0,1.73,-.63);const side1=box(chassis,.11,.37,.83,bikeWhite,-.32,1.47,-.45);const side2=box(chassis,.11,.37,.83,bikeWhite,.32,1.47,-.45);
+const shroud=box(chassis,.62,.5,.32,bikeBlue,0,1.39,.72);shroud.rotation.x=.3;
+const frontGuard=box(chassis,.6,.11,1.13,bikeBlue,0,1.22,1.12);frontGuard.rotation.x=.13;
+const rearGuard=box(chassis,.62,.11,1.2,bikeWhite,0,1.54,-1.18);rearGuard.rotation.x=-.12;
+pipe(chassis,[-.62,2.0,.99],[.62,2.0,.99],.045,chrome);for(const x of [-.39,.39])pipe(chassis,[x,1.52,1.02],[x,2,.99],.036,steel);
+const plate=box(chassis,.5,.45,.1,bikeWhite,0,1.7,1.17);plate.rotation.x=-.15;
+const rider=new THREE.Group();chassis.add(rider);
+const torso=add(rider,new THREE.CapsuleGeometry(.30,.67,5,9),gear,0,2.21,-.4);torso.rotation.x=.34;
+const head=sphere(rider,.32,helmet,0,2.9,-.12);const visor=box(rider,.63,.17,.16,goggle,0,2.91,.13);const peak=box(rider,.55,.065,.39,bikeBlue,0,3.12,.08);
+for(const x of [-1,1]){pipe(rider,[x*.23,2.43,-.22],[x*.42,2.1,.18],.125,gear);pipe(rider,[x*.42,2.1,.18],[x*.53,1.99,.99],.093,gear);pipe(rider,[x*.19,1.95,-.66],[x*.28,1.42,-.51],.16,black);pipe(rider,[x*.28,1.42,-.51],[x*.32,.91,-.34],.13,gear);box(rider,.23,.36,.2,black,x*.32,.91,-.35)}
+const posBike={x:0,y:0,z:8,yaw:0,speed:0,vy:0,pitch:0,air:false,rot:0,crashed:false};
+let clean=0,camDist=12,started=false,toastTimer=0,airStart=0;
+const keys={left:false,right:false,gas:false,brake:false,flip:false};
+function notify(message,duration=2.2){$('message').textContent=message;$('message').classList.add('visible');toastTimer=duration}
+function reset(withNotice=true){Object.assign(posBike,{x:0,y:0,z:8,yaw:0,speed:0,vy:0,pitch:0,air:false,rot:0,crashed:false});if(withNotice)notify('BACK ON THE BIKE')}
+function crash(){posBike.crashed=true;posBike.speed=0;notify('CRASH! TAP RESET TO TRY AGAIN',5)}
+const bindings={ArrowUp:'gas',KeyW:'gas',ArrowDown:'brake',KeyS:'brake',ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',Space:'flip'};
+window.addEventListener('keydown',e=>{if(e.code in bindings){keys[bindings[e.code]]=true;e.preventDefault()}if(!e.repeat&&e.code==='KeyR')reset();if(!e.repeat&&e.code==='KeyG')switchGap();if(!e.repeat&&e.code==='KeyC')switchCamera()});
+window.addEventListener('keyup',e=>{if(e.code in bindings){keys[bindings[e.code]]=false;e.preventDefault()}});
+window.addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
+document.querySelectorAll('[data-control]').forEach(b=>{const k=b.dataset.control;const active=(v)=>{keys[k]=v;b.classList.toggle('pressed',v)};b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);active(true)});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>active(false))});
+function switchGap(){gapFt=gapFt===75?100:75;landingStart=75+gapFt*.3048;rebuildLanding();$('gapLabel').textContent=gapFt+' FT JUMP';reset(false);notify(gapFt+' FOOT GAP SELECTED')}
+function switchCamera(){camDist=camDist===12?18:12;notify(camDist===12?'CHASE CAMERA':'WIDE CAMERA',1)}
+$('gap').onclick=switchGap;$('camera').onclick=switchCamera;$('reset').onclick=()=>reset();
+$('start').onclick=()=>{started=true;$('welcome').classList.add('hidden');notify('LINE IT UP • BUILD SPEED • HIT THE RAMP',3)};
+let last=performance.now();const clock=new THREE.Clock();
+function animate(now){requestAnimationFrame(animate);const dt=Math.min(.035,Math.max(.001,(now-last)/1000));last=now;
+if(started&&!posBike.crashed){
+ const q=posBike;let thrust=keys.gas?1:0,braking=keys.brake?1:0;
+ q.speed+=((thrust?8.9:0)-(braking?15:0)-(!thrust&&!braking?2.2:0)-q.speed*.095)*dt;
+ q.speed=THREE.MathUtils.clamp(q.speed,-3,34);
+ if(!q.air&&q.speed<0&&!keys.brake)q.speed=0;
+ const steer=(keys.right?1:0)-(keys.left?1:0);
+ q.yaw+=steer*dt*(q.air?.47:(.32+Math.min(Math.abs(q.speed),26)*.016))*(q.speed>=0?1:-1);
+ const oldZ=q.z;
+ q.x+=Math.sin(q.yaw)*q.speed*dt;q.z+=Math.cos(q.yaw)*q.speed*dt;
+ const onRamp=Math.abs(q.x)<2.15&&q.z>=61&&q.z<=75;
+ if(!q.air){
+  q.y=surface(q.z,q.x);
+  if(onRamp){const t=(q.z-61)/14;q.pitch=-Math.atan2(4.45*6*t*(1-t)/14,1)}
+  else q.pitch=THREE.MathUtils.damp(q.pitch,0,8,dt);
+  if(oldZ<75&&q.z>=75&&Math.abs(q.x)<2.05&&q.speed>8&&Math.abs(q.yaw)<.42){
+   q.air=true;q.y=4.45;q.vy=q.speed*.40;q.pitch=-.3;q.rot=0;airStart=now;notify('AIRBORNE • HOLD FLIP TO ROTATE',1.8);
+  }
+ }else{
+  q.vy-=9.81*dt;q.y+=q.vy*dt;
+  if(keys.flip){q.pitch-=4.5*dt;q.rot+=4.5*dt}
+  let ground=surface(q.z,q.x);
+  if(q.y<=ground&&q.vy<0){
+   const angle=Math.atan2(Math.sin(q.pitch),Math.cos(q.pitch));
+   const completed=Math.round(q.rot/(Math.PI*2));const aligned=Math.abs(angle)<.64;
+   if(Math.abs(q.x)<7&&q.z>landingStart&&q.z<landingStart+55&&aligned&&q.speed>8){
+    q.air=false;q.y=ground;q.pitch=0;q.vy=0;clean++;
+    $('tricks').textContent='CLEAN LANDINGS: '+clean;
+    notify(completed>0?'STOMPED '+completed+' BACKFLIP'+(completed>1?'S':'')+'!':'CLEAN LANDING!');
+   }else if(Math.abs(q.y-ground)<.8){crash();q.y=ground}
+   else{q.air=false;q.vy=0;q.y=ground;q.pitch=0;notify('BACK ON THE GROUND')}
+  }
+  if(q.y< -12)crash();
+ }
+ if(Math.abs(q.x)>175||q.z>330||q.z< -100)reset();
+ for(let i=0;i<wheels.length;i++)wheels[i].rotation.x+=q.speed*dt/.53;
+ bike.position.set(q.x,q.y,q.z);bike.rotation.set(0,q.yaw,0);chassis.rotation.x=q.pitch;chassis.rotation.z=THREE.MathUtils.damp(chassis.rotation.z,-steer*(q.air?.055:.18),7,dt);
+ $('speed').textContent=Math.max(0,Math.round(q.speed*3.6));
+}else{bike.position.set(posBike.x,posBike.y,posBike.z);bike.rotation.y=posBike.yaw}
+const q=posBike,behind=new THREE.Vector3(q.x-Math.sin(q.yaw)*camDist, q.y+camDist*.43+1.3,q.z-Math.cos(q.yaw)*camDist);camera.position.lerp(behind,Math.min(1,dt*4));const target=new THREE.Vector3(q.x,q.y+1.65,q.z+Math.cos(q.yaw)*4);camera.lookAt(target);
+if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)$('message').classList.remove('visible')}
+renderer.render(scene,camera)}
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+reset(false);camera.position.set(0,6,-8);requestAnimationFrame(animate);
+</script></body></html>
