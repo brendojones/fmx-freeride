@@ -3,20 +3,20 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#101715"><meta name="apple-mobile-web-app-capable" content="yes">
-<title>FMX Freeride — Prototype 0.4</title>
+<title>FMX Freeride — Prototype 0.5</title>
 <style>
 *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#121a18;color:white;font-family:system-ui,-apple-system,Arial,sans-serif;touch-action:none}canvas{display:block;touch-action:none}#game{position:absolute;inset:0}#hud{position:absolute;inset:0;pointer-events:none}.top{position:absolute;top:max(12px,env(safe-area-inset-top));left:18px;right:18px;display:flex;justify-content:space-between;gap:15px;text-shadow:0 2px 8px #0009}.brand{font-size:19px;font-weight:950;letter-spacing:.02em;font-style:italic}.brand b{color:#f5962f}.sub{font-size:9px;font-weight:800;letter-spacing:.18em;color:#d6dacb}.stats{text-align:right}.stats strong{font-size:32px;line-height:1;font-variant-numeric:tabular-nums}.stats span{font-size:11px;font-weight:800}.stats small{display:block;color:#f8b96d;font-weight:800;letter-spacing:.12em}#message{position:absolute;top:24%;width:100%;text-align:center;font-weight:900;font-size:22px;text-shadow:0 2px 12px #000;opacity:0;transition:opacity .25s;padding:0 25px}#message.visible{opacity:1}.toolbar{pointer-events:auto;position:absolute;top:85px;left:18px;display:flex;gap:7px}.toolbar button,.touch button{color:white;border:1px solid #ffffff53;background:#15211dbd;box-shadow:0 4px 18px #0005;backdrop-filter:blur(8px);font-weight:900;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}.toolbar button{padding:10px 13px;border-radius:8px;font-size:10px;letter-spacing:.07em}.touch{pointer-events:auto;position:absolute;bottom:max(20px,env(safe-area-inset-bottom));left:18px;right:18px;display:flex;align-items:end;justify-content:space-between;gap:12px}.touch .group{display:flex;gap:9px;align-items:end}.touch button{border-radius:50%;height:68px;width:68px;font-size:12px}.touch button.pressed{background:#f28b26e3;border-color:#ffe1b3;transform:scale(.97)}.touch .gas{height:96px;width:96px;background:#e7771bd6}.touch .flip{height:75px;width:75px;background:#303f35d9}.touch .brake{height:70px;width:70px}.touch .dir{font-size:24px}.bottom-note{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:9px;color:#ffffff8f;white-space:nowrap}.modal{position:absolute;inset:0;background:linear-gradient(110deg,#0b1411e8,#111b1bd7 45%,#17221ca9);display:grid;place-items:center;padding:22px;z-index:10}.panel{max-width:550px;width:100%;padding:24px 30px;border-left:5px solid #f5952f;background:#0d1815ce;box-shadow:0 15px 70px #0009}.eyebrow{color:#f4ae6b;font-size:11px;letter-spacing:.2em;font-weight:900}.panel h1{font-style:italic;font-size:clamp(43px,9vw,83px);line-height:.83;letter-spacing:-.07em;margin:16px 0 23px;font-weight:1000}.panel h1 em{color:#f3932e;font-style:inherit}.panel p{font-size:16px;line-height:1.5;color:#e1e7dd;max-width:420px}.start{border:0;background:#ee8b25;color:#10130f;padding:16px 28px;border-radius:5px;font-weight:950;font-size:16px;letter-spacing:.08em;margin:14px 0;cursor:pointer}.panel small{display:block;font-size:11px;line-height:1.7;color:#b6c5ba}.panel .disclaimer{color:#94a19b;margin-top:13px}.hidden{display:none!important}#error{position:absolute;inset:0;background:#131715;z-index:20;padding:40px;font-size:18px}#rotate{display:none;position:absolute;top:53%;left:50%;transform:translate(-50%,-50%);background:#101914d9;padding:12px 18px;border-radius:8px;font-size:13px;text-align:center;z-index:3;pointer-events:none}@media (orientation:portrait) and (max-width:700px){#rotate{display:block}.touch button{width:56px;height:56px}.touch .gas{width:75px;height:75px}.touch .flip{width:65px;height:65px}.touch .brake{width:60px;height:60px}.toolbar{top:73px;left:12px}.toolbar button{padding:8px}}@media (max-height:440px){.top{top:7px}.toolbar{top:57px}.touch{bottom:9px}.touch button{width:55px;height:55px}.touch .gas{height:70px;width:70px}.touch .flip{height:62px;width:62px}.touch .brake{height:56px;width:56px}.bottom-note{display:none}.panel{padding:12px 22px}.panel h1{font-size:45px;margin:8px 0}.panel p{font-size:12px;margin:7px 0}.start{padding:10px 20px;margin:7px 0}.panel small{font-size:9px}.panel .disclaimer{display:none}}
 .touch .trick-controls{gap:7px;justify-content:center}.touch .trick-controls button{width:72px;height:64px;border-radius:15px;background:#2b3c39d9;font-size:10px;letter-spacing:.02em}.touch .trick-controls button.pressed{background:#e78124ec}@media(max-height:440px){.touch .trick-controls button{width:63px;height:54px;font-size:9px}}@media(orientation:portrait) and (max-width:700px){.touch .trick-controls{flex-direction:column;gap:4px}.touch .trick-controls button{width:76px;height:36px;font-size:9px}} </style>
 </head><body>
 <div id="game"></div>
 <div id="hud">
-<div class="top"><div><div class="brand"><b>FMX</b> FREERIDE</div><div class="sub">AUSTRALIAN PRACTICE COMPOUND • V0.4</div></div><div class="stats"><strong id="speed">0</strong> <span>KM/H</span><small id="gapLabel">75 FT JUMP</small><small id="tricks">CLEAN LANDINGS: 0</small></div></div>
+<div class="top"><div><div class="brand"><b>FMX</b> FREERIDE</div><div class="sub">AUSTRALIAN PRACTICE COMPOUND • V0.5</div></div><div class="stats"><strong id="speed">0</strong> <span>KM/H</span><small id="gapLabel">ONE JUMP • FREERIDE</small><small id="tricks">CLEAN LANDINGS: 0</small></div></div>
 <div id="message" role="status" aria-live="polite"></div>
-<div class="toolbar"><button id="gap">75 FT / 100 FT</button><button id="camera">CAMERA</button><button id="reset">RESET</button></div>
+<div class="toolbar"><button id="camera">CAMERA</button><button id="reset">RESET</button></div>
 <div class="touch"><div class="group"><button class="dir" data-control="left">◀</button><button class="dir" data-control="right">▶</button></div><div class="group trick-controls"><button class="flip" data-control="flip">BACKFLIP</button><button class="flip" data-control="superman">SUPERMAN</button><button class="flip" data-control="whip">WHIP</button></div><div class="group"><button class="brake" data-control="brake">BRAKE</button><button class="gas" data-control="gas">THROTTLE</button></div></div>
 <div class="bottom-note">Prototype physics • Real-scale gaps • Turn sideways for best results</div></div>
 <div id="rotate">↻ Rotate your phone to landscape for the best ride</div>
-<div id="welcome" class="modal"><div class="panel"><div class="eyebrow">ORIGINAL 3D FREESTYLE MOTOCROSS</div><h1>FMX<br><em>FREERIDE.</em></h1><p>One compound. Two jump distances. Full throttle. Throw a backflip and stick the landing.</p><button class="start" id="start">START RIDING →</button><small>iPhone: Touch controls. Desktop: W/↑ throttle, S/↓ brake, A/D steer, Space backflip, Q Superman, E whip, R reset, G change gap, C camera.</small><small class="disclaimer">Early playable graphics prototype — improved textured terrain, articulated rider, custom 3D bike detail. Riding physics remain simplified.</small></div></div>
+<div id="welcome" class="modal"><div class="panel"><div class="eyebrow">ORIGINAL 3D FREESTYLE MOTOCROSS</div><h1>FMX<br><em>FREERIDE.</em></h1><p>One jump. One detailed bike. Three freestyle tricks. Full throttle.</p><button class="start" id="start">START RIDING →</button><small>iPhone: Touch controls. Desktop: W/↑ throttle, S/↓ brake, A/D steer, Space backflip, Q Superman, E whip, R reset, C camera.</small><small class="disclaimer">A small playable visual prototype. Sculpted bike panels, detailed helmet and rider gear; physics are still arcade-style.</small></div></div>
 <div id="error" class="hidden"><h2>Can't load the 3D game</h2><p>Please check your internet connection, then reload the page in Safari or Chrome.</p></div>
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
@@ -51,7 +51,7 @@ const tireRubber=mat('#131717',.94),darkMetal=mat('#252b2b',.36,.65),accent=mat(
 
 const terrain=new THREE.PlaneGeometry(440,540,100,115);terrain.rotateX(-Math.PI/2);let pos=terrain.attributes.position;const cols=[];for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),d=Math.abs(x);const base=.16*Math.sin(x*.09)*Math.cos(z*.065);const edge=Math.max(0,(d-18)/55);const yy=base+edge*edge*(2+Math.sin(z*.038)*2.2)+Math.sin(x*.28+z*.15)*edge*.18;pos.setY(i,yy);const k=rnd(i+2);let c=new THREE.Color(d<19?'#9d7958':(k>.54?'#798459':'#6a7952'));c.multiplyScalar(.85+k*.24);cols.push(c.r,c.g,c.b)}terrain.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));terrain.computeVertexNormals();const terrainMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,map:groundTexture});add(scene,terrain,terrainMat,0,0,85,false).receiveShadow=true;
 function surface(z,x){if(Math.abs(x)<2.15&&z>=61&&z<=75){const t=(z-61)/14;return 4.45*(t*t*(3-2*t));}if(z>=landingStart&&z<=landingStart+55&&Math.abs(x)<7){let t=z-landingStart;return t<15?1.1+(4.8-1.1)*(t/15):Math.max(.07,4.8-(t-15)*4.7/40)}return 0}
-let gapFt=75,landingStart=75+22.86;
+const landingStart=75+22.86;
 
 function brushedSteelTexture(){
  const c=document.createElement('canvas');c.width=256;c.height=512;const ctx=c.getContext('2d');
@@ -96,9 +96,9 @@ const frameNodes=[[0,1.15,-.3],[0,.84,.35],[0,1.48,.4],[0,1.1,-.8],[0,1.16,.6]];
 for(let i=0;i<frameNodes.length-1;i++)pipe(chassis,frameNodes[i],frameNodes[(i+1)%frameNodes.length],.08,chrome);
 const motor=box(chassis,.6,.55,.6,black,0,1.08,-.15);const motorHead=add(chassis,new THREE.CylinderGeometry(.24,.29,.45,12),steel,0,1.33,-.15);motorHead.rotation.z=Math.PI/2;
 for(const x of [-.23,.23]){pipe(chassis,[x,1.43,.7],[x,.64,1.13],.063,chrome);pipe(chassis,[x,1.2,-.65],[x,.6,-1.08],.045,steel)}
-const tank=add(chassis,new THREE.SphereGeometry(.48,20,12),bikeBlue,0,1.65,.2);tank.scale.set(.94,.48,1.7);
-const seat=add(chassis,new THREE.SphereGeometry(.48,18,12),black,0,1.71,-.7);seat.scale.set(.7,.16,1.32);const side1=box(chassis,.11,.37,.83,bikeWhite,-.32,1.47,-.45);const side2=box(chassis,.11,.37,.83,bikeWhite,.32,1.47,-.45);
-const shroud=box(chassis,.62,.5,.32,bikeBlue,0,1.39,.72);shroud.rotation.x=.3;
+// Fuel tank is integrated into the sculpted bodywork.
+const seat=add(chassis,new THREE.SphereGeometry(.48,18,12),black,0,1.73,-.70);seat.scale.set(.70,.16,1.32);
+// Shrouds have been replaced with sculpted fairing profiles.
 const frontGuard=box(chassis,.6,.11,1.13,bikeBlue,0,1.22,1.12);frontGuard.visible=false;
 const rearGuard=box(chassis,.62,.11,1.2,bikeWhite,0,1.54,-1.18);rearGuard.visible=false;
 pipe(chassis,[-.62,2.0,.99],[.62,2.0,.99],.045,chrome);for(const x of [-.39,.39])pipe(chassis,[x,1.52,1.02],[x,2,.99],.036,steel);
@@ -119,7 +119,7 @@ function curvedFender(target,wheelZ,color,start,end,width,rad){
 curvedFender(chassis,1.1,bikeBlue,-.78,.90,.60,.79);
 curvedFender(chassis,-1.08,bikeWhite,-1.0,.82,.60,.73);
 
-const plate=box(chassis,.5,.45,.1,bikeWhite,0,1.7,1.17);plate.rotation.x=-.15;
+const plate=panelPlaceHolder();function panelPlaceHolder(){const m=box(chassis,.52,.48,.095,satinWhite,0,1.71,1.13);m.rotation.x=-.09;return m}
 
 // Rider is articulated: a simple anatomical skeleton rather than a sliding rigid statue.
 // These reusable capsule joints allow a genuine Superman pose and return-to-bike animation.
@@ -131,7 +131,7 @@ for(const x of [-.34,.34]){
  addTube([x,1.43,.6],[x,.68,1.11],.044,steel);
  const axle=add(details,new THREE.CylinderGeometry(.085,.085,.32,12),darkMetal,x,1.22,.11);axle.rotation.x=Math.PI/2;
 }
-const muffler=add(details,new THREE.CylinderGeometry(.13,.16,.93,16),chrome,.37,1.39,-.75);muffler.rotation.x=Math.PI/2;
+// Silencer moved to the new sculpted 3D bike assembly.
 addTube([.26,1.21,-.2],[.36,1.3,-.52],.07,darkMetal);
 const shockSpring=new THREE.Group();shockSpring.position.set(0,1.1,-.6);details.add(shockSpring);
 const springPts=[];for(let i=0;i<105;i++){let a=i*Math.PI*.26;springPts.push(new THREE.Vector3(Math.cos(a)*.105,i*.0046,Math.sin(a)*.105))}
@@ -145,11 +145,78 @@ for(let wi=0;wi<2;wi++){
  for(let a=0;a<8;a++){const p=a*Math.PI/4;const n=add(group,new THREE.CylinderGeometry(.018,.018,.16,8),steel,.12,Math.sin(p)*.2,Math.cos(p)*.2);n.rotation.z=Math.PI/2}
 }
 const cable=addTube([-.24,1.95,1.02],[-.30,1.46,1.11],.015,rubber);
-const headlightless=add(details,new THREE.SphereGeometry(.43,18,12),bikeBlue,0,1.68,.46);headlightless.scale.set(.81,.53,.78);
-const sidePanelL=add(details,new THREE.SphereGeometry(.47,16,10),bikeWhite,-.3,1.49,-.4);sidePanelL.scale.set(.2,.53,1.0);
-const sidePanelR=add(details,new THREE.SphereGeometry(.47,16,10),bikeWhite,.3,1.49,-.4);sidePanelR.scale.set(.2,.53,1.0);
-const radiatorL=box(details,.13,.42,.35,steel,-.34,1.41,.35),radiatorR=box(details,.13,.42,.35,steel,.34,1.41,.35);
-for(let i=0;i<5;i++)for(const x of [-.42,.42])box(details,.025,.02,.32,darkMetal,x,1.25+i*.07,.35);
+// The blocky body shells are replaced with bevelled custom side-profile geometry.
+// Custom-shaped number panels now carry original decals.
+
+
+
+
+// Motocross bodywork: bevelled silhouette meshes rather than rectangular primitives.
+// Local side profiles are specified as [forward (z), height (y)] in metres.
+function panelProfile(target,points,width,material,sideX=0){
+ const path=new THREE.Shape();path.moveTo(points[0][0],points[0][1]);
+ for(let i=1;i<points.length;i++)path.lineTo(points[i][0],points[i][1]);
+ path.closePath();const geo=new THREE.ExtrudeGeometry(path,{depth:width,steps:1,bevelEnabled:true,bevelThickness:.02,bevelSize:.025,bevelSegments:2,curveSegments:8});
+ geo.rotateY(-Math.PI/2);geo.translate(sideX+width/2,0,0);
+ const mesh=add(target,geo,material);return mesh;
+}
+const satinBlue=new THREE.MeshPhysicalMaterial({color:'#0871b1',roughness:.33,metalness:.08,clearcoat:.72,clearcoatRoughness:.3});
+const satinWhite=new THREE.MeshPhysicalMaterial({color:'#e6e6de',roughness:.37,metalness:.03,clearcoat:.65,clearcoatRoughness:.34});
+const dirtBlack=new THREE.MeshStandardMaterial({color:'#202729',roughness:.91});
+const brushedAlu=mat('#9ea6a6',.35,.69);
+const darkPlastic=mat('#1f2528',.64,.02);
+const contrast=mat('#fa962b',.43,.08);
+const bodyPlastics=new THREE.Group();chassis.add(bodyPlastics);
+panelProfile(bodyPlastics,[[-1.4,1.54],[-1.24,1.74],[-.45,1.79],[-.52,1.55],[-.92,1.45]],.55,satinWhite);
+for(let side of [-1,1]){
+ const x=side*.32;
+ panelProfile(bodyPlastics,[[-.75,1.58],[-.35,1.80],[.28,1.71],[.43,1.5],[.12,1.28],[-.40,1.30]],.065,satinBlue,x);
+ panelProfile(bodyPlastics,[[.27,1.73],[.66,1.67],[.94,1.49],[.80,1.26],[.48,1.23],[.21,1.39]],.075,satinWhite,x);
+ panelProfile(bodyPlastics,[[-1.28,1.5],[-.95,1.62],[-.53,1.57],[-.38,1.31],[-.98,1.34]],.06,satinWhite,x);
+}
+const sculptTank=add(bodyPlastics,new THREE.SphereGeometry(.48,24,16),satinBlue,0,1.67,.23);sculptTank.scale.set(.8,.43,1.43);
+// radiator grill, rear swingarm, fork crowns, front brake line
+for(let side of [-1,1]){
+ const x=side*.43;
+ const cover=box(bodyPlastics,.03,.38,.32,brushedAlu,x,1.48,.38);
+ for(let j=0;j<6;j++)box(bodyPlastics,.033,.012,.3,darkPlastic,x+side*.018,1.3+j*.059,.39);
+ pipe(bodyPlastics,[side*.30,.58,-1.06],[side*.33,.91,-.15],.071,brushedAlu);
+ pipe(bodyPlastics,[side*.32,1.48,.8],[side*.32,.63,1.1],.058,brushedAlu);
+ add(bodyPlastics,new THREE.SphereGeometry(.07,12,8),darkPlastic,side*.33,.89,-.2);
+}
+// Actual exhaust silencer shape, tapered, with visible cap.
+const can=add(bodyPlastics,new THREE.CylinderGeometry(.11,.14,.74,22),brushedAlu,.43,1.45,-.89);can.rotation.x=Math.PI/2;
+add(bodyPlastics,new THREE.CylinderGeometry(.11,.11,.025,18),darkPlastic,.43,1.47,-1.23).rotation.x=Math.PI/2;
+pipe(bodyPlastics,[.36,1.31,-.55],[.4,1.30,-.30],.065,brushedAlu);
+// brake discs and chain/sprocket details
+for(let wi=0;wi<2;wi++){
+ const group=wheels[wi];
+ const sprocket=add(group,new THREE.TorusGeometry(.21,.028,8,36),brushedAlu,-.18,0,0);sprocket.rotation.y=Math.PI/2;
+ for(let j=0;j<12;j++){
+  const a=j/12*Math.PI*2;
+  add(group,new THREE.SphereGeometry(.024,6,5),darkPlastic,-.19,Math.sin(a)*.21,Math.cos(a)*.21);
+ }
+}
+for(let side of [-1,1]){const footpeg=box(bodyPlastics,.26,.025,.13,brushedAlu,side*.39,1.0,-.35);footpeg.rotation.z=side*.09;}
+// Branded original number plates and graphics.
+function paintDecal(mode){
+ const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;const ctx=canvas.getContext('2d');
+ ctx.clearRect(0,0,512,512);
+ ctx.fillStyle=mode==='number'?'#e9ece8':'#126b9c';ctx.fillRect(0,0,512,512);
+ ctx.fillStyle='#eb8c2c';ctx.beginPath();ctx.moveTo(0,375);ctx.lineTo(512,125);ctx.lineTo(512,215);ctx.lineTo(0,465);ctx.fill();
+ ctx.fillStyle=mode==='number'?'#162c35':'#fff';
+ ctx.font='italic 900 245px Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(mode==='number'?'11':'FMX',255,237);
+ ctx.font='bold 47px Arial,sans-serif';ctx.fillText('FREERIDE',252,420);
+ const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=8;return tex;
+}
+const originalNumbers=paintDecal('number'),originalLogo=paintDecal('logo');
+function sticker(parent,tex,w,h,x,y,z,rotationY=0){
+ const mesh=add(parent,new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex,transparent:true,side:THREE.DoubleSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}),x,y,z,false);
+ mesh.rotation.y=rotationY;return mesh;
+}
+sticker(bodyPlastics,originalNumbers,.42,.35,0,1.78,1.19,0);
+for(let side of [-1,1])sticker(bodyPlastics,originalLogo,.52,.27,side*.415,1.51,-.41,side*Math.PI/2);
+
 const rider=new THREE.Group();chassis.add(rider);
 const suit=mat('#222c2f',.93),jersey=mat('#273b43',.9),bootMat=mat('#e0e4df',.69),gloveMat=mat('#161b1d',.75),helmetTrim=mat('#ef8f25',.35),skinTone=mat('#c69879',.8);
 const rig={};
@@ -162,7 +229,7 @@ add(rig.helmet,new THREE.SphereGeometry(.33,20,14,0,Math.PI*2,0,Math.PI*.42),hel
 const goggles=add(rig.helmet,new THREE.SphereGeometry(.29,18,10),goggle,0,.017,.17);goggles.scale.set(.9,.27,.6);
 const peak=add(rig.helmet,new THREE.SphereGeometry(.25,14,10),bikeBlue,0,.21,.21);peak.scale.set(1.04,.18,1.15);
 rig.limbs=[];
-function limb(radius,matl){let m=add(rider,new THREE.CylinderGeometry(radius*.82,radius,.9,12),matl);rig.limbs.push(m);return m}
+function limb(radius,matl){let m=add(rider,new THREE.CapsuleGeometry(radius,.9-2*radius,5,11),matl);rig.limbs.push(m);return m}
 rig.leftArmUpper=limb(.126,jersey);rig.rightArmUpper=limb(.126,jersey);
 rig.leftArmLower=limb(.093,suit);rig.rightArmLower=limb(.093,suit);
 rig.leftLegUpper=limb(.18,suit);rig.rightLegUpper=limb(.18,suit);
@@ -170,6 +237,36 @@ rig.leftLegLower=limb(.15,suit);rig.rightLegLower=limb(.15,suit);
 rig.leftBoot=limb(.17,bootMat);rig.rightBoot=limb(.17,bootMat);
 rig.leftHand=add(rider,new THREE.SphereGeometry(.12,12,8),gloveMat);
 rig.rightHand=add(rider,new THREE.SphereGeometry(.12,12,8),gloveMat);
+
+// Helmet: shaped chin guard and forehead vents, tinted curved goggle lens.
+const helmetShell=mat('#f4f3e9',.34,.08),helmetInset=mat('#141d21',.58),visorGlass=new THREE.MeshPhysicalMaterial({color:'#243741',metalness:.31,roughness:.14,clearcoat:1,clearcoatRoughness:.08});
+const chinGuard=add(rig.helmet,new THREE.SphereGeometry(.25,16,12),helmetShell,0,-.21,.17);chinGuard.scale.set(1.0,.59,.85);
+const chinMouth=add(rig.helmet,new THREE.SphereGeometry(.18,14,8),helmetInset,0,-.19,.33);chinMouth.scale.set(.95,.37,.12);
+for(const side of [-1,1]){
+ const jaw=add(rig.helmet,new THREE.SphereGeometry(.15,14,10),helmetTrim,side*.235,-.14,.11);jaw.scale.set(.5,1.0,1.1);
+ const temple=add(rig.helmet,new THREE.SphereGeometry(.08,12,8),helmetInset,side*.295,.065,-.02);temple.scale.set(.23,.62,1.28);
+}
+for(let i=0;i<3;i++){const vent=box(rig.helmet,.045,.017,.11,helmetInset,(i-1)*.095,.275,.23);vent.rotation.x=-.4}
+goggles.material=visorGlass;
+const strap=add(rig.helmet,new THREE.TorusGeometry(.293,.025,8,34),helmetInset,0,.018,0);strap.rotation.y=Math.PI/2;
+const backShell=add(rig.helmet,new THREE.SphereGeometry(.28,16,12),helmetTrim,0,.12,-.07);backShell.scale.set(.68,.29,1.05);
+// Jersey/armour pattern: rider's back is the most frequently viewed surface.
+const chestDecal=paintDecal('logo');
+sticker(rig.torso,chestDecal,.40,.44,0,.04,-.315,Math.PI);
+for(let side of [-1,1]){
+ const bar=box(rig.torso,.075,.57,.055,contrast,side*.23,-.04,-.26);bar.rotation.z=side*.14;
+}
+rig.jointPieces={};
+for(const label of ['left','right']){
+ const side=label==='left'?-1:1;
+ const elbow=add(rider,new THREE.SphereGeometry(.15,12,10),dirtBlack);elbow.scale.set(.83,1.1,.8);
+ const knee=add(rider,new THREE.SphereGeometry(.20,12,10),satinWhite);knee.scale.set(1,.87,.63);
+ const bootToe=add(rider,new THREE.SphereGeometry(.21,14,10),bootMat);bootToe.scale.set(1,.58,1.6);
+ const ankleStrap=add(rider,new THREE.TorusGeometry(.17,.022,7,16),contrast);ankleStrap.rotation.x=Math.PI/2;
+ const wrist=add(rider,new THREE.SphereGeometry(.10,12,8),contrast);wrist.scale.set(1.13,.42,.9);
+ rig.jointPieces[label]={elbow,knee,bootToe,ankleStrap,wrist,side};
+}
+
 const unitY=new THREE.Vector3(0,1,0);
 function poseBone(mesh,a,b){const va=new THREE.Vector3(...a),vb=new THREE.Vector3(...b),delta=vb.clone().sub(va);mesh.position.copy(va).add(vb).multiplyScalar(.5);mesh.quaternion.setFromUnitVectors(unitY,delta.clone().normalize());mesh.scale.y=delta.length()/.9}
 function lerp3(a,b,p){return a.map((v,i)=>v+(b[i]-v)*p)}
@@ -197,23 +294,28 @@ function updateRiderPose(p,dt){
   poseBone(rig[label+'LegUpper'],sideHip,knee);poseBone(rig[label+'LegLower'],knee,ankle);
   poseBone(rig[label+'Boot'],ankle,foot);
   rig[label+'Hand'].position.set(...hand);
+  const parts=rig.jointPieces[label];
+  parts.elbow.position.set(...elbow);parts.knee.position.set(...knee);
+  parts.bootToe.position.set(...lerp3(foot,[foot[0],foot[1]-.085,foot[2]+.14],1));
+  parts.ankleStrap.position.set(...lerp3(ankle,foot,.55));
+  parts.wrist.position.set(...hand);
+
  }
 }
 updateRiderPose(0,0);
 const posBike={x:0,y:0,z:8,yaw:0,speed:0,vy:0,pitch:0,air:false,rot:0,crashed:false,super:0,whip:0,peakSuper:0,peakWhip:0};
-let clean=0,camDist=12,started=false,toastTimer=0,airStart=0;
+let clean=0,camDist=8.8,started=false,toastTimer=0,airStart=0;
 const keys={left:false,right:false,gas:false,brake:false,flip:false,superman:false,whip:false};
 function notify(message,duration=2.2){$('message').textContent=message;$('message').classList.add('visible');toastTimer=duration}
 function reset(withNotice=true){Object.assign(posBike,{x:0,y:0,z:8,yaw:0,speed:0,vy:0,pitch:0,air:false,rot:0,crashed:false,super:0,whip:0,peakSuper:0,peakWhip:0});updateRiderPose(0,0);if(withNotice)notify('BACK ON THE BIKE')}
 function crash(){posBike.crashed=true;posBike.speed=0;notify('CRASH! TAP RESET TO TRY AGAIN',5)}
 const bindings={ArrowUp:'gas',KeyW:'gas',ArrowDown:'brake',KeyS:'brake',ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',Space:'flip',KeyQ:'superman',KeyE:'whip'};
-window.addEventListener('keydown',e=>{if(e.code in bindings){keys[bindings[e.code]]=true;e.preventDefault()}if(!e.repeat&&e.code==='KeyR')reset();if(!e.repeat&&e.code==='KeyG')switchGap();if(!e.repeat&&e.code==='KeyC')switchCamera()});
+window.addEventListener('keydown',e=>{if(e.code in bindings){keys[bindings[e.code]]=true;e.preventDefault()}if(!e.repeat&&e.code==='KeyR')reset();if(!e.repeat&&e.code==='KeyC')switchCamera()});
 window.addEventListener('keyup',e=>{if(e.code in bindings){keys[bindings[e.code]]=false;e.preventDefault()}});
 window.addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
 document.querySelectorAll('[data-control]').forEach(b=>{const k=b.dataset.control;const active=(v)=>{keys[k]=v;b.classList.toggle('pressed',v)};b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);active(true)});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>active(false))});
-function switchGap(){gapFt=gapFt===75?100:75;landingStart=75+gapFt*.3048;rebuildLanding();$('gapLabel').textContent=gapFt+' FT JUMP';reset(false);notify(gapFt+' FOOT GAP SELECTED')}
-function switchCamera(){camDist=camDist===12?18:12;notify(camDist===12?'CHASE CAMERA':'WIDE CAMERA',1)}
-$('gap').onclick=switchGap;$('camera').onclick=switchCamera;$('reset').onclick=()=>reset();
+function switchCamera(){camDist=camDist===8.8?14:8.8;notify(camDist===8.8?'CHASE CAMERA':'WIDE CAMERA',1)}
+$('camera').onclick=switchCamera;$('reset').onclick=()=>reset();
 $('start').onclick=()=>{started=true;$('welcome').classList.add('hidden');notify('LINE IT UP • BUILD SPEED • HIT THE RAMP',3)};
 let last=performance.now();const clock=new THREE.Clock();
 function animate(now){requestAnimationFrame(animate);const dt=Math.min(.035,Math.max(.001,(now-last)/1000));last=now;
@@ -255,7 +357,7 @@ if(started&&!posBike.crashed){
  bike.position.set(q.x,q.y,q.z);bike.rotation.set(0,q.yaw,0);chassis.rotation.x=q.pitch;chassis.rotation.z=THREE.MathUtils.damp(chassis.rotation.z,-steer*(q.air?.055:.18),7,dt);chassis.rotation.y=THREE.MathUtils.damp(chassis.rotation.y,q.air?q.whip*.72:0,6,dt);updateRiderPose(q.super,dt);
  $('speed').textContent=Math.max(0,Math.round(q.speed*3.6));
 }else{bike.position.set(posBike.x,posBike.y,posBike.z);bike.rotation.y=posBike.yaw}
-const q=posBike,behind=new THREE.Vector3(q.x-Math.sin(q.yaw)*camDist, q.y+camDist*.43+1.3,q.z-Math.cos(q.yaw)*camDist);camera.position.lerp(behind,Math.min(1,dt*4));const target=new THREE.Vector3(q.x,q.y+1.65,q.z+Math.cos(q.yaw)*4);camera.lookAt(target);
+const q=posBike,behind=new THREE.Vector3(q.x-Math.sin(q.yaw)*camDist, q.y+camDist*.32+1.8,q.z-Math.cos(q.yaw)*camDist);camera.position.lerp(behind,Math.min(1,dt*4));const target=new THREE.Vector3(q.x,q.y+1.78,q.z+Math.cos(q.yaw)*3.2);camera.lookAt(target);
 if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)$('message').classList.remove('visible')}
 renderer.render(scene,camera)}
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
