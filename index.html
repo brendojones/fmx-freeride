@@ -102,6 +102,86 @@ const earthTexture=noiseCanvas(847,'#9d8061');earthTexture.repeat.set(1.6,8);
 const tireRubber=mat('#131717',.94),darkMetal=mat('#252b2b',.36,.65),accent=mat('#ee8326',.46,.11);
 
 const terrain=new THREE.PlaneGeometry(440,540,100,115);terrain.rotateX(-Math.PI/2);let pos=terrain.attributes.position;const cols=[];for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),d=Math.abs(x);const base=.16*Math.sin(x*.09)*Math.cos(z*.065);const edge=Math.max(0,(d-18)/55);const yy=base+edge*edge*(2+Math.sin(z*.038)*2.2)+Math.sin(x*.28+z*.15)*edge*.18;pos.setY(i,yy);const k=rnd(i+2);let c=new THREE.Color(d<19?'#9d7958':(k>.54?'#798459':'#6a7952'));c.multiplyScalar(.85+k*.24);cols.push(c.r,c.g,c.b)}terrain.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));terrain.computeVertexNormals();const terrainMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,map:groundTexture});add(scene,terrain,terrainMat,0,0,85,false).receiveShadow=true;
+
+// Feathered motocross run-up: painted dirt with tyre ruts and granular soil,
+// rather than a sharp rectangular, low-poly road cutout.
+function makeRuttedTrackTexture(){
+ const c=document.createElement('canvas');c.width=512;c.height=1024;const ctx=c.getContext('2d');
+ const img=ctx.createImageData(512,1024),p=img.data;
+ let seed=0x1f4fb5;const random=()=>((seed=(Math.imul(seed,1664525)+1013904223)|0)>>>0)/4294967296;
+ for(let y=0;y<1024;y++){
+  const drift=Math.sin(y*.018)*5+Math.sin(y*.049)*1.5;
+  for(let x=0;x<512;x++){
+   const n=random(),i=(y*512+x)*4;
+   const edge=Math.max(0,Math.min(1,(Math.min(x,511-x)-4)/115));
+   const feather=edge*edge*(3-2*edge);
+   const groove1=Math.exp(-Math.pow((x-182-drift)/11,2));
+   const groove2=Math.exp(-Math.pow((x-331-drift)/11,2));
+   const grooves=groove1+groove2;
+   const n2=Math.sin((x+8*y)*.18)*2;
+   const brightness=(n-.5)*28+n2-grooves*24;
+   p[i]=Math.max(0,Math.min(255,147+brightness));
+   p[i+1]=Math.max(0,Math.min(255,117+brightness*.86));
+   p[i+2]=Math.max(0,Math.min(255,84+brightness*.75));
+   p[i+3]=Math.min(255,Math.round(218*feather));
+  }
+ }
+ ctx.putImageData(img,0,0);
+ const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;
+ tx.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+ return tx;
+}
+const track=add(scene,new THREE.PlaneGeometry(16.5,93),new THREE.MeshStandardMaterial({
+ map:makeRuttedTrackTexture(),transparent:true,depthWrite:false,roughness:1,polygonOffset:true,polygonOffsetFactor:-1}),0,.17,15.0,false);
+track.rotation.x=-Math.PI/2;track.renderOrder=2;
+// Soft contact shadow under the motorcycle, especially useful when the sun
+// shadow map drops to 1024 on older iPhones.
+function makeContactTexture(){
+ const c=document.createElement('canvas');c.width=c.height=128;
+ const ctx=c.getContext('2d'),grad=ctx.createRadialGradient(64,64,8,64,64,61);
+ grad.addColorStop(0,'rgba(0,0,0,.49)');grad.addColorStop(.6,'rgba(0,0,0,.20)');grad.addColorStop(1,'rgba(0,0,0,0)');
+ ctx.fillStyle=grad;ctx.fillRect(0,0,128,128);
+ return new THREE.CanvasTexture(c);
+}
+const contactMaterial=new THREE.MeshBasicMaterial({map:makeContactTexture(),transparent:true,depthWrite:false,opacity:.75,polygonOffset:true,polygonOffsetFactor:-2});
+const contactShadow=add(scene,new THREE.PlaneGeometry(3.0,3.9),contactMaterial,0,.2,0,false);
+contactShadow.rotation.x=-Math.PI/2;contactShadow.renderOrder=3;
+// Dust sprites use one shared radial texture and recycled pools instead of
+// hundreds of new geometry objects while riding.
+function makeDustTexture(){
+ const c=document.createElement('canvas');c.width=c.height=64;const ctx=c.getContext('2d');
+ const g=ctx.createRadialGradient(32,32,2,32,32,31);
+ g.addColorStop(0,'rgba(236,212,169,.43)');g.addColorStop(.42,'rgba(208,181,141,.22)');g.addColorStop(1,'rgba(211,183,149,0)');
+ ctx.fillStyle=g;ctx.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);
+}
+const dustTexture=makeDustTexture(),dustPool=[];
+for(let i=0;i<17;i++){const material=new THREE.SpriteMaterial({map:dustTexture,transparent:true,depthWrite:false,opacity:0,color:0xe3c6a2});const sprite=new THREE.Sprite(material);sprite.visible=false;scene.add(sprite);dustPool.push({sprite,life:0,velocity:new THREE.Vector3()})}
+let dustTimer=0;
+function updateDust(q,dt){
+ dustTimer-=dt;
+ if(!q.air && !q.crashed && q.speed>3 && dustTimer<=0 && started){
+  dustTimer=graphicsHigh?.115:.19;
+  const p=dustPool.find(item=>item.life<=0);
+  if(p){p.life=.9;p.sprite.visible=true;
+   p.sprite.position.set(q.x-Math.sin(q.yaw)*1.35,surface(q.z,q.x)+.38,q.z-Math.cos(q.yaw)*1.35);
+   p.velocity.set((Math.random()-.5)*.5,.24,(Math.random()-.5)*.5);
+   p.sprite.scale.set(.7,.7,1)}
+ }
+ for(const p of dustPool){
+  if(p.life<=0)continue;p.life-=dt;
+  if(p.life<=0){p.sprite.visible=false;continue}
+  p.sprite.position.addScaledVector(p.velocity,dt);
+  const size=.6+(1-p.life)*1.25;
+  p.sprite.scale.set(size,size,1);
+  p.sprite.material.opacity=Math.max(0,Math.min(.42,p.life*.35));
+ }
+ const floor=surface(q.z,q.x);
+ const height=Math.max(0,q.y-floor);
+ contactShadow.position.set(q.x,floor+.21,q.z);
+ contactShadow.material.opacity=.8*Math.max(.05,1-height/10);
+ contactShadow.scale.setScalar(1+height*.1);
+}
+
 function surface(z,x){if(Math.abs(x)<2.15&&z>=61&&z<=75){const t=(z-61)/14;return 4.45*(t*t*(3-2*t));}if(z>=landingStart&&z<=landingStart+55&&Math.abs(x)<7){let t=z-landingStart;return t<15?1.1+(4.8-1.1)*(t/15):Math.max(.07,4.8-(t-15)*4.7/40)}return 0}
 const landingStart=75+22.86;
 
@@ -123,14 +203,14 @@ rebuildLanding();
 function treeAt(x,z,height){
  const holder=new THREE.Group();holder.position.set(x,0,z);scene.add(holder);
  const bark=mat('#776552',1),leaf=mat('#667a57',1);let trunk=add(holder,new THREE.CylinderGeometry(.12,.26,height*.58,7),bark,0,height*.29,0,false);
- for(let j=0;j<5;j++){
+ for(let j=0;j<4;j++){
   let a=j*2.399,rx=Math.cos(a),rz=Math.sin(a),yy=height*(.46+.07*(j%3)),rad=height*(.20+.03*(j%2));
   pipe(holder,[0,yy-.5,0],[rx*rad*.8,yy+rad*.34,rz*rad*.7],.055,bark);
-  const clump=add(holder,new THREE.IcosahedronGeometry(rad,1),leaf,rx*rad*.9,yy+rad*.5,rz*rad*.7,false);
-  clump.scale.set(1.25,.62,1.06);clump.rotation.y=a;
+  const clump=add(holder,new THREE.SphereGeometry(rad,12,9),leaf,rx*rad*.9,yy+rad*.5,rz*rad*.7,false);
+  clump.scale.set(1.35,.51,1.12);clump.rotation.y=a;clump.rotation.x=.06*j;
  }
 }
-for(let i=0;i<65;i++){
+for(let i=0;i<25;i++){
  const x=(rnd(i*13)-.5)*390,z=(rnd(i*29+1)-.5)*500+65;
  if(Math.abs(x)<25)continue;
  treeAt(x,z,6+rnd(i+17)*7);
@@ -139,7 +219,7 @@ for(let i=0;i<8;i++){
  const z=-180+i*75,side=i%2?1:-1;
  const h=4+(i%4)*2;const hill=add(scene,new THREE.SphereGeometry(1,18,10),mat('#8c9180'),side*140,-4,z,false);hill.scale.set(105,14+h,85);
 }
-for(let i=0;i<18;i++){const x=(i%2?1:-1)*(11+rnd(i)*12),z=(i*17)%230-30;const rock=add(scene,new THREE.DodecahedronGeometry(.55+rnd(i+10)*1,0),mat(i%2?'#6d675d':'#867668'),x,.33,z,false);rock.scale.y=.48}
+for(let i=0;i<11;i++){const x=(i%2?1:-1)*(11+rnd(i)*12),z=(i*17)%230-30;const rock=add(scene,new THREE.DodecahedronGeometry(.55+rnd(i+10)*1,0),mat(i%2?'#6d675d':'#867668'),x,.33,z,false);rock.scale.y=.48}
 for(let i=0;i<9;i++){const z=35+i*15;pipe(scene,[-18,0,z],[-18,1.3,z],.09,steel);pipe(scene,[18,0,z],[18,1.3,z],.09,steel)}for(const x of [-18,18])pipe(scene,[x,1.3,35],[x,1.3,160],.06,steel);
 const bike=new THREE.Group();scene.add(bike);const tiltGroup=new THREE.Group();tiltGroup.position.y=1.21;bike.add(tiltGroup);const chassis=new THREE.Group();chassis.position.y=-1.21;tiltGroup.add(chassis);
 const wheels=[];function wheel(z){const group=new THREE.Group();group.position.set(0,.59,z);chassis.add(group);const tire=add(group,new THREE.TorusGeometry(.53,.115,12,38),rubber);tire.rotation.y=Math.PI/2;const rim=add(group,new THREE.TorusGeometry(.37,.028,8,32),chrome);rim.rotation.y=Math.PI/2;const disc=add(group,new THREE.CylinderGeometry(.17,.17,.075,20),steel);disc.rotation.z=Math.PI/2;for(let i=0;i<16;i++){const a=i*Math.PI/8;pipe(group,[0,0,0],[0,Math.sin(a)*.37,Math.cos(a)*.37],.012,chrome)}wheels.push(group)}
@@ -273,10 +353,28 @@ sticker(bodyPlastics,originalNumbers,.42,.35,0,1.78,1.19,0);
 for(let side of [-1,1])sticker(bodyPlastics,originalLogo,.52,.27,side*.415,1.51,-.41,side*Math.PI/2);
 
 const rider=new THREE.Group();chassis.add(rider);
-const suit=mat('#222c2f',.93),jersey=mat('#273b43',.9),bootMat=mat('#e0e4df',.69),gloveMat=mat('#161b1d',.75),helmetTrim=mat('#ef8f25',.35),skinTone=mat('#c69879',.8);
+const suit=mat('#222c2f',.97),jersey=mat('#344952',.96),bootMat=mat('#e0e4df',.78),gloveMat=mat('#161b1d',.82),helmetTrim=mat('#ef8f25',.36),skinTone=mat('#c69879',.85);
+function gearFabricTexture(){
+ const c=document.createElement('canvas');c.width=c.height=256;const cx=c.getContext('2d');
+ cx.fillStyle='#dddeda';cx.fillRect(0,0,256,256);
+ for(let y=0;y<256;y+=3){cx.fillStyle=y%2?'#a4b5b5':'#f9f9f0';cx.globalAlpha=.18;cx.fillRect(0,y,256,1)}
+ for(let x=0;x<256;x+=4){cx.fillStyle='#718b93';cx.globalAlpha=.075;cx.fillRect(x,0,1,256)}
+ cx.globalAlpha=1;
+ const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;
+ tx.wrapS=tx.wrapT=THREE.RepeatWrapping;tx.repeat.set(2,3);return tx;
+}
+const fabricTex=gearFabricTexture();
+jersey.map=fabricTex;suit.map=fabricTex;jersey.needsUpdate=true;suit.needsUpdate=true;
 const rig={};
 rig.pelvis=add(rider,new THREE.SphereGeometry(.24,16,12),suit);
-rig.torso=add(rider,new THREE.CapsuleGeometry(.31,.53,8,14),jersey);
+const torsoProfile=[
+ new THREE.Vector2(.22,-.48),new THREE.Vector2(.275,-.40),
+ new THREE.Vector2(.29,-.20),new THREE.Vector2(.32,.04),
+ new THREE.Vector2(.35,.27),new THREE.Vector2(.29,.43),
+ new THREE.Vector2(.18,.51)
+];
+rig.torso=add(rider,new THREE.LatheGeometry(torsoProfile,28),jersey);
+rig.torso.scale.set(1.0,1.02,.73);
 rig.chest=add(rider,new THREE.SphereGeometry(.32,16,12),accent);rig.chest.scale.set(.92,.62,.32);
 rig.helmet=new THREE.Group();rider.add(rig.helmet);
 add(rig.helmet,new THREE.SphereGeometry(.32,20,14),helmet,0,0,0);
@@ -316,10 +414,12 @@ for(const label of ['left','right']){
  const side=label==='left'?-1:1;
  const elbow=add(rider,new THREE.SphereGeometry(.15,12,10),dirtBlack);elbow.scale.set(.83,1.1,.8);
  const knee=add(rider,new THREE.SphereGeometry(.20,12,10),satinWhite);knee.scale.set(1,.87,.63);
- const bootToe=add(rider,new THREE.SphereGeometry(.21,14,10),bootMat);bootToe.scale.set(1,.58,1.6);
+ const bootToe=add(rider,new THREE.SphereGeometry(.21,18,12),bootMat);bootToe.scale.set(1,.48,1.55);
+ const sole=add(rider,new THREE.SphereGeometry(.22,14,9),dirtBlack);sole.scale.set(1.06,.20,1.52);
+ const shinPlate=add(rider,new THREE.SphereGeometry(.195,14,10),bootMat);shinPlate.scale.set(.85,1.30,.51);
  const ankleStrap=add(rider,new THREE.TorusGeometry(.17,.022,7,16),contrast);ankleStrap.rotation.x=Math.PI/2;
  const wrist=add(rider,new THREE.SphereGeometry(.10,12,8),contrast);wrist.scale.set(1.13,.42,.9);
- rig.jointPieces[label]={elbow,knee,bootToe,ankleStrap,wrist,side};
+ rig.jointPieces[label]={elbow,knee,bootToe,sole,shinPlate,ankleStrap,wrist,side};
 }
 
 
@@ -415,6 +515,9 @@ function updateRiderPose(p,dt){
   const parts=rig.jointPieces[label];
   parts.elbow.position.set(...elbow);parts.knee.position.set(...knee);
   parts.bootToe.position.set(...lerp3(foot,[foot[0],foot[1]-.085,foot[2]+.14],1));
+  parts.sole.position.set(foot[0],foot[1]-.19,foot[2]+.13);
+  const shinMid=lerp3(knee,ankle,.66);parts.shinPlate.position.set(...shinMid);
+  parts.shinPlate.quaternion.copy(rig[label+'LegLower'].quaternion);
   parts.ankleStrap.position.set(...lerp3(ankle,foot,.55));
   parts.wrist.position.set(...hand);
 
@@ -523,6 +626,7 @@ camera.lookAt(followTarget);
 const portrait=innerHeight>innerWidth;
 const desiredFov=(portrait?68:58)+(viewMode===1?3:0)+motionZoom;
 camera.fov=THREE.MathUtils.damp(camera.fov,desiredFov,3.6,dt);camera.updateProjectionMatrix();
+updateDust(posBike,dt);
 if(assetMixer){assetMixer.timeScale=Math.max(0,Math.min(3,posBike.speed/12));assetMixer.update(dt)}
 if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)$('message').classList.remove('visible')}
 renderer.render(scene,camera)}
