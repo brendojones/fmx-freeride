@@ -339,7 +339,7 @@ createCourseStrip(130,151);
 createCourseStrip(220,317);
 // A bevelled crown on the earthworks: grooves and side shaping are derived
 // from the same surface used by the bike. Nothing can be ridden invisibly.
-function placedLetterBoard(label,z,x=-11.3){
+function placedLetterBoard(label,z,x=12.8){
  const c=document.createElement('canvas');c.width=512;c.height=144;
  const ctx=c.getContext('2d');
  ctx.fillStyle='#182b30';ctx.beginPath();ctx.roundRect(2,2,508,140,13);ctx.fill();
@@ -673,7 +673,7 @@ const shoulderPads={};
 for(const side of [-1,1]){
  const name=side<0?'left':'right';
  const pad=add(rider,new THREE.SphereGeometry(.17,18,12),jersey);
- pad.scale.set(1.20,.83,.84);
+ pad.scale.set(.96,.76,.85);
  shoulderPads[name]=pad;
  const padAccent=add(pad,new THREE.SphereGeometry(.17,14,9),helmetTrim,0,.25,0);
  padAccent.scale.set(.35,.12,.40);
@@ -851,13 +851,13 @@ sun.position.set(-56,83,posBike.z-19);
 sun.target.position.set(0,0,posBike.z);
 sun.target.updateMatrixWorld();
 const q=posBike,portrait=innerHeight>innerWidth;
-const dist=viewMode===0?(portrait?23.5:15.0):(portrait?32:22);
-const lookZ=q.z+(q.air?5.0:10.0);
-const desiredCam=new THREE.Vector3(q.x-dist,q.y+3.3,lookZ-1.2);
+const dist=viewMode===0?(portrait?21.5:12.5):(portrait?30:20);
+const lookZ=q.z+(q.air?4.4:7.4);
+const desiredCam=new THREE.Vector3(q.x-dist,q.y+3.05,lookZ-.7);
 camera.position.lerp(desiredCam,Math.min(1,dt*3.8));
 followTarget.lerp(new THREE.Vector3(0,q.y+1.65,lookZ),Math.min(1,dt*4.7));
 camera.lookAt(followTarget);
-camera.fov=THREE.MathUtils.damp(camera.fov,portrait?55:49,3.5,dt);
+camera.fov=THREE.MathUtils.damp(camera.fov,portrait?56:47,3.5,dt);
 camera.updateProjectionMatrix();
 if(assetMixer){assetMixer.timeScale=Math.max(0,Math.min(3,posBike.speed/12));assetMixer.update(dt)}
 if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)$('message').classList.remove('visible')}
