@@ -3,28 +3,29 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#101715"><meta name="apple-mobile-web-app-capable" content="yes">
-<title>FMX Freeride — Prototype 0.5</title>
+<title>FMX Freeride — Prototype 0.6</title>
 <style>
 *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#121a18;color:white;font-family:system-ui,-apple-system,Arial,sans-serif;touch-action:none}canvas{display:block;touch-action:none}#game{position:absolute;inset:0}#hud{position:absolute;inset:0;pointer-events:none}.top{position:absolute;top:max(12px,env(safe-area-inset-top));left:18px;right:18px;display:flex;justify-content:space-between;gap:15px;text-shadow:0 2px 8px #0009}.brand{font-size:19px;font-weight:950;letter-spacing:.02em;font-style:italic}.brand b{color:#f5962f}.sub{font-size:9px;font-weight:800;letter-spacing:.18em;color:#d6dacb}.stats{text-align:right}.stats strong{font-size:32px;line-height:1;font-variant-numeric:tabular-nums}.stats span{font-size:11px;font-weight:800}.stats small{display:block;color:#f8b96d;font-weight:800;letter-spacing:.12em}#message{position:absolute;top:24%;width:100%;text-align:center;font-weight:900;font-size:22px;text-shadow:0 2px 12px #000;opacity:0;transition:opacity .25s;padding:0 25px}#message.visible{opacity:1}.toolbar{pointer-events:auto;position:absolute;top:85px;left:18px;display:flex;gap:7px}.toolbar button,.touch button{color:white;border:1px solid #ffffff53;background:#15211dbd;box-shadow:0 4px 18px #0005;backdrop-filter:blur(8px);font-weight:900;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}.toolbar button{padding:10px 13px;border-radius:8px;font-size:10px;letter-spacing:.07em}.touch{pointer-events:auto;position:absolute;bottom:max(20px,env(safe-area-inset-bottom));left:18px;right:18px;display:flex;align-items:end;justify-content:space-between;gap:12px}.touch .group{display:flex;gap:9px;align-items:end}.touch button{border-radius:50%;height:68px;width:68px;font-size:12px}.touch button.pressed{background:#f28b26e3;border-color:#ffe1b3;transform:scale(.97)}.touch .gas{height:96px;width:96px;background:#e7771bd6}.touch .flip{height:75px;width:75px;background:#303f35d9}.touch .brake{height:70px;width:70px}.touch .dir{font-size:24px}.bottom-note{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:9px;color:#ffffff8f;white-space:nowrap}.modal{position:absolute;inset:0;background:linear-gradient(110deg,#0b1411e8,#111b1bd7 45%,#17221ca9);display:grid;place-items:center;padding:22px;z-index:10}.panel{max-width:550px;width:100%;padding:24px 30px;border-left:5px solid #f5952f;background:#0d1815ce;box-shadow:0 15px 70px #0009}.eyebrow{color:#f4ae6b;font-size:11px;letter-spacing:.2em;font-weight:900}.panel h1{font-style:italic;font-size:clamp(43px,9vw,83px);line-height:.83;letter-spacing:-.07em;margin:16px 0 23px;font-weight:1000}.panel h1 em{color:#f3932e;font-style:inherit}.panel p{font-size:16px;line-height:1.5;color:#e1e7dd;max-width:420px}.start{border:0;background:#ee8b25;color:#10130f;padding:16px 28px;border-radius:5px;font-weight:950;font-size:16px;letter-spacing:.08em;margin:14px 0;cursor:pointer}.panel small{display:block;font-size:11px;line-height:1.7;color:#b6c5ba}.panel .disclaimer{color:#94a19b;margin-top:13px}.hidden{display:none!important}#error{position:absolute;inset:0;background:#131715;z-index:20;padding:40px;font-size:18px}#rotate{display:none;position:absolute;top:53%;left:50%;transform:translate(-50%,-50%);background:#101914d9;padding:12px 18px;border-radius:8px;font-size:13px;text-align:center;z-index:3;pointer-events:none}@media (orientation:portrait) and (max-width:700px){#rotate{display:block}.touch button{width:56px;height:56px}.touch .gas{width:75px;height:75px}.touch .flip{width:65px;height:65px}.touch .brake{width:60px;height:60px}.toolbar{top:73px;left:12px}.toolbar button{padding:8px}}@media (max-height:440px){.top{top:7px}.toolbar{top:57px}.touch{bottom:9px}.touch button{width:55px;height:55px}.touch .gas{height:70px;width:70px}.touch .flip{height:62px;width:62px}.touch .brake{height:56px;width:56px}.bottom-note{display:none}.panel{padding:12px 22px}.panel h1{font-size:45px;margin:8px 0}.panel p{font-size:12px;margin:7px 0}.start{padding:10px 20px;margin:7px 0}.panel small{font-size:9px}.panel .disclaimer{display:none}}
 .touch .trick-controls{gap:7px;justify-content:center}.touch .trick-controls button{width:72px;height:64px;border-radius:15px;background:#2b3c39d9;font-size:10px;letter-spacing:.02em}.touch .trick-controls button.pressed{background:#e78124ec}@media(max-height:440px){.touch .trick-controls button{width:63px;height:54px;font-size:9px}}@media(orientation:portrait) and (max-width:700px){.touch .trick-controls{flex-direction:column;gap:4px}.touch .trick-controls button{width:76px;height:36px;font-size:9px}} </style>
-</head><body>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script></head><body>
 <div id="game"></div>
 <div id="hud">
-<div class="top"><div><div class="brand"><b>FMX</b> FREERIDE</div><div class="sub">AUSTRALIAN PRACTICE COMPOUND • V0.5</div></div><div class="stats"><strong id="speed">0</strong> <span>KM/H</span><small id="gapLabel">ONE JUMP • FREERIDE</small><small id="tricks">CLEAN LANDINGS: 0</small></div></div>
+<div class="top"><div><div class="brand"><b>FMX</b> FREERIDE</div><div class="sub">AUSTRALIAN PRACTICE COMPOUND • V0.6</div></div><div class="stats"><strong id="speed">0</strong> <span>KM/H</span><small id="gapLabel">ONE JUMP • FREERIDE</small><small id="tricks">CLEAN LANDINGS: 0</small></div></div>
 <div id="message" role="status" aria-live="polite"></div>
 <div class="toolbar"><button id="camera">CAMERA</button><button id="reset">RESET</button></div>
 <div class="touch"><div class="group"><button class="dir" data-control="left">◀</button><button class="dir" data-control="right">▶</button></div><div class="group trick-controls"><button class="flip" data-control="flip">BACKFLIP</button><button class="flip" data-control="superman">SUPERMAN</button><button class="flip" data-control="whip">WHIP</button></div><div class="group"><button class="brake" data-control="brake">BRAKE</button><button class="gas" data-control="gas">THROTTLE</button></div></div>
-<div class="bottom-note">Prototype physics • Real-scale gaps • Turn sideways for best results</div></div>
+<div class="bottom-note"><span id="bike-quality">LOADING 3D BIKE MODEL</span> • Turn sideways for best results</div></div>
 <div id="rotate">↻ Rotate your phone to landscape for the best ride</div>
-<div id="welcome" class="modal"><div class="panel"><div class="eyebrow">ORIGINAL 3D FREESTYLE MOTOCROSS</div><h1>FMX<br><em>FREERIDE.</em></h1><p>One jump. One detailed bike. Three freestyle tricks. Full throttle.</p><button class="start" id="start">START RIDING →</button><small>iPhone: Touch controls. Desktop: W/↑ throttle, S/↓ brake, A/D steer, Space backflip, Q Superman, E whip, R reset, C camera.</small><small class="disclaimer">A small playable visual prototype. Sculpted bike panels, detailed helmet and rider gear; physics are still arcade-style.</small></div></div>
+<div id="welcome" class="modal"><div class="panel"><div class="eyebrow">ORIGINAL 3D FREESTYLE MOTOCROSS</div><h1>FMX<br><em>FREERIDE.</em></h1><p>One jump. One detailed bike. Three freestyle tricks. Full throttle.</p><button class="start" id="start">START RIDING →</button><small>iPhone: Touch controls. Desktop: W/↑ throttle, S/↓ brake, A/D steer, Space backflip, Q Superman, E whip, R reset, C camera.</small><small class="disclaimer">Version 0.6 loads a real 3D motorcycle model with a lower-detail backup. Character movement and physics are still prototype quality.</small></div></div>
 <div id="error" class="hidden"><h2>Can't load the 3D game</h2><p>Please check your internet connection, then reload the page in Safari or Chrome.</p></div>
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const $=id=>document.getElementById(id), scene=new THREE.Scene();scene.background=new THREE.Color('#a9c3cf');scene.fog=new THREE.FogExp2('#bbc7bd',0.0031);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,700);
 const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.22;$('game').appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xdfefff,0x746951,2.05));const sun=new THREE.DirectionalLight(0xffe1b6,3.1);sun.position.set(-65,115,22);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-140;sun.shadow.camera.right=140;sun.shadow.camera.top=155;sun.shadow.camera.bottom=-115;sun.shadow.normalBias=.035;scene.add(sun);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.06;$('game').appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xdfefff,0x746951,1.45));const sun=new THREE.DirectionalLight(0xffe1b6,2.65);sun.position.set(-65,115,22);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-140;sun.shadow.camera.right=140;sun.shadow.camera.top=155;sun.shadow.camera.bottom=-115;sun.shadow.normalBias=.035;scene.add(sun);
 const mat=(color,roughness=1,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
 const dirt=mat('#956d4d'),dirtLight=mat('#b58b62'),grass=mat('#647351'),darkGrass=mat('#526a46'),steel=mat('#636e72',.46,.7),chrome=mat('#b4b9ba',.25,.75),rubber=mat('#151a1b'),black=mat('#252c2a'),bikeBlue=mat('#096eb1',.38,.23),bikeWhite=mat('#e0e5e2',.45),orange=mat('#f58b23',.47),skin=mat('#d5a17d'),gear=mat('#1b272c'),goggle=mat('#171c20',.15,.25),helmet=mat('#e9ecdd',.3);
 const add=(parent,geo,material,x=0,y=0,z=0,shadow=true)=>{const obj=new THREE.Mesh(geo,material);obj.position.set(x,y,z);obj.castShadow=shadow;obj.receiveShadow=true;parent.add(obj);return obj};
@@ -270,6 +271,69 @@ for(const label of ['left','right']){
  rig.jointPieces[label]={elbow,knee,bootToe,ankleStrap,wrist,side};
 }
 
+
+// PROPER MODEL PIPELINE: use licensed, textured GLB assets instead of procedurally
+// recreating the motorcycle out of capsules and boxes.
+// Priority 1: 108k triangle unbranded CC0 motocross bike (Innerscene).
+// Priority 2: mobile-optimised CC0 trials bike (3DAssets.dev, guaranteed CORS).
+// Existing handmade geometry remains as a failsafe ONLY if loading is unavailable.
+const realBikeUrls=[
+ {url:'https://www.innerscene.com/api/library/dirt-motorcycle-0a9c8589/download',label:'DETAILED 3D DIRT BIKE'},
+ {url:'https://cdn.3dassets.dev/assets/15417/v1/model.glb',label:'OPTIMISED 3D DIRT BIKE'}
+];
+let realBikeLoaded=false,assetLoadIndex=0,assetRequest=0,assetMixer=null;
+const heroHolder=new THREE.Group();chassis.add(heroHolder);
+const placeholderBikeParts=chassis.children.filter(part=>part!==rider && part!==heroHolder);
+function fixMotorcycleAxes(object){
+ // Most glTF assets are +Y-up, but the high-detail source was authored on a
+ // different axis; infer its longitudinal and upright directions from bounds.
+ const original=new THREE.Box3().setFromObject(object),sz=original.getSize(new THREE.Vector3());
+ const dims=[sz.x,sz.y,sz.z],ascending=[0,1,2].sort((a,b)=>dims[a]-dims[b]);
+ const widthAxis=ascending[0],heightAxis=ascending[1],lengthAxis=ascending[2];
+ const target=[new THREE.Vector3(),new THREE.Vector3(),new THREE.Vector3()];
+ target[widthAxis].set(1,0,0);target[heightAxis].set(0,1,0);target[lengthAxis].set(0,0,1);
+ const basis=new THREE.Matrix4().makeBasis(...target);
+ if(basis.determinant()<0){target[widthAxis].multiplyScalar(-1);basis.makeBasis(...target)}
+ object.applyMatrix4(basis);
+ return object;
+}
+function installMotorcycle(gltf,label){
+ const model=fixMotorcycleAxes(gltf.scene);
+ model.updateMatrixWorld(true);
+ const box1=new THREE.Box3().setFromObject(model),size=box1.getSize(new THREE.Vector3());
+ if(!Number.isFinite(size.z)||size.z<.1)throw new Error('Invalid bike geometry');
+ const ratio=2.20/size.z;
+ model.scale.multiplyScalar(ratio);model.updateMatrixWorld(true);
+ const b=new THREE.Box3().setFromObject(model),center=b.getCenter(new THREE.Vector3());
+ model.position.x-=center.x;model.position.z-=center.z;model.position.y-=b.min.y-.03;
+ model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material){const mats=Array.isArray(o.material)?o.material:[o.material];for(const m of mats){if(m.isMeshStandardMaterial||m.isMeshPhysicalMaterial){m.side=THREE.FrontSide; m.envMapIntensity=.85;}}}}});
+ heroHolder.add(model);
+ for(const part of placeholderBikeParts)part.visible=false;
+ // Reposition our existing articulated rider onto the correctly-scaled 3D bike.
+ // Do not claim the rider is a full mocap rig yet.
+ rider.scale.setScalar(.78);rider.position.set(0,-.45,0);
+ realBikeLoaded=true;
+ if(gltf.animations?.length){assetMixer=new THREE.AnimationMixer(model);const wheelClip=gltf.animations.find(a=>/wheel.roll/i.test(a.name));if(wheelClip)assetMixer.clipAction(wheelClip).play()}
+ $('bike-quality').textContent=label;
+ notify('REAL 3D MOTORCYCLE MODEL LOADED',2.4);
+}
+function loadBikeAsset(index=0){
+ if(index>=realBikeUrls.length){$('bike-quality').textContent='PROCEDURAL BIKE • MODEL UNAVAILABLE';return}
+ const item=realBikeUrls[index],token=++assetRequest;
+ let finished=false;
+ // Failed or stalled external endpoints must never stop the playable game.
+ const watchdog=setTimeout(()=>{if(!finished&&token===assetRequest){finished=true;loadBikeAsset(index+1)}},8000);
+ new GLTFLoader().load(item.url,gltf=>{
+  if(token!==assetRequest)return;clearTimeout(watchdog);finished=true;
+  try{installMotorcycle(gltf,item.label)}catch(error){console.warn('Motorcycle model invalid:',error);loadBikeAsset(index+1)}
+ },undefined,error=>{
+  if(token!==assetRequest)return;clearTimeout(watchdog);finished=true;
+  console.warn('Motorcycle download unavailable, trying the next source:',error);
+  loadBikeAsset(index+1);
+ });
+}
+loadBikeAsset();
+
 const unitY=new THREE.Vector3(0,1,0);
 function poseBone(mesh,a,b){const va=new THREE.Vector3(...a),vb=new THREE.Vector3(...b),delta=vb.clone().sub(va);mesh.position.copy(va).add(vb).multiplyScalar(.5);mesh.quaternion.setFromUnitVectors(unitY,delta.clone().normalize());mesh.scale.y=delta.length()/.9}
 function lerp3(a,b,p){return a.map((v,i)=>v+(b[i]-v)*p)}
@@ -307,7 +371,7 @@ function updateRiderPose(p,dt){
 }
 updateRiderPose(0,0);
 const posBike={x:0,y:0,z:8,yaw:0,speed:0,vy:0,pitch:0,air:false,rot:0,crashed:false,super:0,whip:0,peakSuper:0,peakWhip:0};
-let clean=0,camDist=8.8,started=false,toastTimer=0,airStart=0;
+let clean=0,camDist=7.8,started=false,toastTimer=0,airStart=0;
 const keys={left:false,right:false,gas:false,brake:false,flip:false,superman:false,whip:false};
 function notify(message,duration=2.2){$('message').textContent=message;$('message').classList.add('visible');toastTimer=duration}
 function reset(withNotice=true){Object.assign(posBike,{x:0,y:0,z:8,yaw:0,speed:0,vy:0,pitch:0,air:false,rot:0,crashed:false,super:0,whip:0,peakSuper:0,peakWhip:0});updateRiderPose(0,0);tiltGroup.rotation.set(0,0,0);if(withNotice)notify('BACK ON THE BIKE')}
@@ -317,7 +381,7 @@ window.addEventListener('keydown',e=>{if(e.code in bindings){keys[bindings[e.cod
 window.addEventListener('keyup',e=>{if(e.code in bindings){keys[bindings[e.code]]=false;e.preventDefault()}});
 window.addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
 document.querySelectorAll('[data-control]').forEach(b=>{const k=b.dataset.control;const active=(v)=>{keys[k]=v;b.classList.toggle('pressed',v)};b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);active(true)});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>active(false))});
-function switchCamera(){camDist=camDist===8.8?14:8.8;notify(camDist===8.8?'CHASE CAMERA':'WIDE CAMERA',1)}
+function switchCamera(){camDist=camDist===7.8?13:7.8;notify(camDist===7.8?'CHASE CAMERA':'WIDE CAMERA',1)}
 $('camera').onclick=switchCamera;$('reset').onclick=()=>reset();
 $('start').onclick=()=>{started=true;$('welcome').classList.add('hidden');notify('LINE IT UP • BUILD SPEED • HIT THE RAMP',3)};
 let last=performance.now();const clock=new THREE.Clock();
@@ -361,6 +425,7 @@ if(started&&!posBike.crashed){
  $('speed').textContent=Math.max(0,Math.round(q.speed*3.6));
 }else{bike.position.set(posBike.x,posBike.y,posBike.z);bike.rotation.y=posBike.yaw}
 const q=posBike,behind=new THREE.Vector3(q.x-Math.sin(q.yaw)*camDist, q.y+camDist*.32+1.8,q.z-Math.cos(q.yaw)*camDist);camera.position.lerp(behind,Math.min(1,dt*4));const target=new THREE.Vector3(q.x,q.y+1.78,q.z+Math.cos(q.yaw)*3.2);camera.lookAt(target);
+if(assetMixer){assetMixer.timeScale=Math.max(0,Math.min(3,posBike.speed/12));assetMixer.update(dt)}
 if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)$('message').classList.remove('visible')}
 renderer.render(scene,camera)}
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
