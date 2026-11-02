@@ -585,14 +585,27 @@ function createJerseyBack(){
 const jerseyBack=sticker(rig.torso,createJerseyBack(),.46,.56,0,-.012,-.245,Math.PI);
 jerseyBack.material.depthTest=true;
 
+
+// Subtle cloth creases beneath the jersey sleeves and boots, following the
+// same shoulder/knee/ankle pose every frame.
+const foldMat=mat('#192931',1);
+const foldCaps={};
+for(const name of ['left','right']){
+ const elbowFold=add(rider,new THREE.SphereGeometry(.115,14,9),foldMat);
+ const kneeFold=add(rider,new THREE.SphereGeometry(.155,14,9),foldMat);
+ elbowFold.scale.set(.86,.57,1);
+ kneeFold.scale.set(.85,.64,1);
+ foldCaps[name]={elbowFold,kneeFold};
+}
+
 const unitY=new THREE.Vector3(0,1,0);
 function poseBone(mesh,a,b){const va=new THREE.Vector3(...a),vb=new THREE.Vector3(...b),delta=vb.clone().sub(va);mesh.position.copy(va).add(vb).multiplyScalar(.5);mesh.quaternion.setFromUnitVectors(unitY,delta.clone().normalize());mesh.scale.y=delta.length()/.9}
 function lerp3(a,b,p){return a.map((v,i)=>v+(b[i]-v)*p)}
-function updateRiderPose(p,dt){
+function updateRiderPose(p,dt,stance=0){
  const t=THREE.MathUtils.smoothstep(p,0,1);
- const hip=lerp3([0,1.9,-.63],[0,2.38,-1.63],t);
- const shoulder=lerp3([0,2.54,-.30],[0,2.42,-.08],t);
- const head=lerp3([0,2.94,-.06],[0,2.63,.25],t);
+ const hip=lerp3([0,1.9+stance*.10,-.63+stance*.05],[0,2.38,-1.63],t);
+ const shoulder=lerp3([0,2.54-stance*.13,-.30+stance*.19],[0,2.42,-.08],t);
+ const head=lerp3([0,2.94-stance*.11,-.06+stance*.20],[0,2.63,.25],t);
  rig.pelvis.position.set(...hip);
  const mid=lerp3(hip,shoulder,.57);rig.torso.position.set(...mid);
  const h=new THREE.Vector3(...hip),sh=new THREE.Vector3(...shoulder);
@@ -601,11 +614,11 @@ function updateRiderPose(p,dt){
  rig.helmet.position.set(...head);rig.helmet.rotation.x=-t*.38;
  for(let side of [-1,1]){
   const label=side<0?'left':'right',x=side*.27;
-  const sh=lerp3([x,2.48,-.27],[x,2.43,-.06],t);
+  const sh=lerp3([x,2.48-stance*.09,-.27+stance*.14],[x,2.43,-.06],t);
   shoulderPads[label].position.set(...sh);
-  const elbow=lerp3([side*.42,2.1,.19],[side*.50,2.17,.34],t);
+  const elbow=lerp3([side*(.42+stance*.10),2.1-stance*.06,.19+stance*.12],[side*.50,2.17,.34],t);
   const hand=[side*.52,2.02,.99];
-  const knee=lerp3([side*.32,1.37,-.49],[side*.32,2.22,-2.19],t);
+  const knee=lerp3([side*.32,1.37+stance*.07,-.49+stance*.055],[side*.32,2.22,-2.19],t);
   const ankle=lerp3([side*.34,1.02,-.30],[side*.29,2.14,-3.0],t);
   const foot=lerp3([side*.34,.90,-.21],[side*.28,2.12,-3.22],t);
   const sideHip=[hip[0]+x*.86,hip[1],hip[2]];
@@ -615,6 +628,8 @@ function updateRiderPose(p,dt){
   rig[label+'Hand'].position.set(...hand);
   const parts=rig.jointPieces[label];
   parts.elbow.position.set(...elbow);parts.knee.position.set(...knee);
+  foldCaps[label].elbowFold.position.set(...elbow);
+  foldCaps[label].kneeFold.position.set(...knee);
   parts.bootToe.position.set(...lerp3(foot,[foot[0],foot[1]-.085,foot[2]+.14],1));
   parts.sole.position.set(foot[0],foot[1]-.19,foot[2]+.13);
   const shinMid=lerp3(knee,ankle,.66);parts.shinPlate.position.set(...shinMid);
@@ -705,7 +720,7 @@ if(started&&!posBike.crashed){
  }
  if(Math.abs(q.x)>175||q.z>330||q.z< -100)reset();
  for(let i=0;i<wheels.length;i++)wheels[i].rotation.x+=q.speed*dt/.53;
- bike.position.set(q.x,q.y,q.z);bike.rotation.set(0,q.yaw,0);tiltGroup.rotation.x=q.pitch;tiltGroup.rotation.z=THREE.MathUtils.damp(tiltGroup.rotation.z,-steer*(q.air?.055:.18),7,dt);tiltGroup.rotation.y=THREE.MathUtils.damp(tiltGroup.rotation.y,q.air?q.whip*.72:0,6,dt);updateRiderPose(q.super,dt);
+ bike.position.set(q.x,q.y,q.z);bike.rotation.set(0,q.yaw,0);tiltGroup.rotation.x=q.pitch;tiltGroup.rotation.z=THREE.MathUtils.damp(tiltGroup.rotation.z,-steer*(q.air?.055:.18),7,dt);tiltGroup.rotation.y=THREE.MathUtils.damp(tiltGroup.rotation.y,q.air?q.whip*.72:0,6,dt);updateRiderPose(q.super,dt,Math.min(.7,Math.abs(q.speed)*.022+(q.air?.24:0)));
  $('speed').textContent=Math.max(0,Math.round(q.speed*3.6));
 }else{bike.position.set(posBike.x,posBike.y,posBike.z);bike.rotation.y=posBike.yaw}
 // Smooth, lower, three-quarter mobile action camera.
