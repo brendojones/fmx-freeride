@@ -52,7 +52,17 @@ const tireRubber=mat('#131717',.94),darkMetal=mat('#252b2b',.36,.65),accent=mat(
 const terrain=new THREE.PlaneGeometry(440,540,100,115);terrain.rotateX(-Math.PI/2);let pos=terrain.attributes.position;const cols=[];for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),d=Math.abs(x);const base=.16*Math.sin(x*.09)*Math.cos(z*.065);const edge=Math.max(0,(d-18)/55);const yy=base+edge*edge*(2+Math.sin(z*.038)*2.2)+Math.sin(x*.28+z*.15)*edge*.18;pos.setY(i,yy);const k=rnd(i+2);let c=new THREE.Color(d<19?'#9d7958':(k>.54?'#798459':'#6a7952'));c.multiplyScalar(.85+k*.24);cols.push(c.r,c.g,c.b)}terrain.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));terrain.computeVertexNormals();const terrainMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,map:groundTexture});add(scene,terrain,terrainMat,0,0,85,false).receiveShadow=true;
 function surface(z,x){if(Math.abs(x)<2.15&&z>=61&&z<=75){const t=(z-61)/14;return 4.45*(t*t*(3-2*t));}if(z>=landingStart&&z<=landingStart+55&&Math.abs(x)<7){let t=z-landingStart;return t<15?1.1+(4.8-1.1)*(t/15):Math.max(.07,4.8-(t-15)*4.7/40)}return 0}
 let gapFt=75,landingStart=75+22.86;
-function ramp(){const g=new THREE.Group();scene.add(g);const segments=28;const vs=[],idx=[];for(let j=0;j<=segments;j++){const z=61+j*14/segments,y=4.45*Math.pow(j/segments,2)*(3-2*j/segments);for(const x of [-2.15,2.15])vs.push(x,y+.05,z)}for(let j=0;j<segments;j++){const k=j*2;idx.push(k,k+2,k+1,k+1,k+2,k+3)}const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(vs,3));geo.setIndex(idx);geo.computeVertexNormals();let deck=add(g,geo,steel,0,0,0);deck.material.side=THREE.DoubleSide;for(const x of [-2,2]){for(let j=0;j<12;j++){const z=61+j*1.15,h=surface(z,0);pipe(g,[x,0,z],[x,h,z],.048,chrome)}pipe(g,[x,0,61],[x,4.45,75],.07,chrome)}for(let j=0;j<7;j++){let z=61+j*2.2;pipe(g,[-2.2,0,z],[2.2,0,z],.05,steel)}for(let j=0;j<16;j++){let z=61+j*.9;pipe(g,[-2.15,surface(z,0)+.04,z],[2.15,surface(z,0)+.04,z],.012,chrome)}return g}
+
+function brushedSteelTexture(){
+ const c=document.createElement('canvas');c.width=256;c.height=512;const ctx=c.getContext('2d');
+ ctx.fillStyle='#394245';ctx.fillRect(0,0,c.width,c.height);
+ for(let y=0;y<512;y+=13){ctx.fillStyle='#737c7c';ctx.fillRect(0,y,256,2);ctx.fillStyle='#171d1d';ctx.fillRect(0,y+3,256,4)}
+ for(let x=0;x<256;x+=14){ctx.strokeStyle='rgba(8,15,16,.69)';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+98,512);ctx.stroke()}
+ const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.wrapS=tx.wrapT=THREE.RepeatWrapping;tx.repeat.set(4,1);tx.anisotropy=8;return tx;
+}
+const steelDeckMat=new THREE.MeshStandardMaterial({map:brushedSteelTexture(),color:'#cad3d0',metalness:.67,roughness:.48,side:THREE.DoubleSide});
+
+function ramp(){const g=new THREE.Group();scene.add(g);const segments=28;const vs=[],idx=[];for(let j=0;j<=segments;j++){const z=61+j*14/segments,y=4.45*Math.pow(j/segments,2)*(3-2*j/segments);for(const x of [-2.15,2.15])vs.push(x,y+.05,z)}for(let j=0;j<segments;j++){const k=j*2;idx.push(k,k+2,k+1,k+1,k+2,k+3)}const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(vs,3));geo.setIndex(idx);const rampUV=[];for(let j=0;j<=segments;j++)rampUV.push(0,j/segments,1,j/segments);geo.setAttribute('uv',new THREE.Float32BufferAttribute(rampUV,2));geo.computeVertexNormals();let deck=add(g,geo,steelDeckMat,0,0,0);deck.material.side=THREE.DoubleSide;for(const x of [-2,2]){for(let j=0;j<12;j++){const z=61+j*1.15,h=surface(z,0);pipe(g,[x,0,z],[x,h,z],.048,chrome)}pipe(g,[x,0,61],[x,4.45,75],.07,chrome)}for(let j=0;j<7;j++){let z=61+j*2.2;pipe(g,[-2.2,0,z],[2.2,0,z],.05,steel)}for(let j=0;j<16;j++){let z=61+j*.9;pipe(g,[-2.15,surface(z,0)+.04,z],[2.15,surface(z,0)+.04,z],.012,chrome)}return g}
 ramp();
 let landingMesh=new THREE.Group();scene.add(landingMesh);
 function rebuildLanding(){while(landingMesh.children.length){let o=landingMesh.children.pop();o.parent=null;o.geometry?.dispose()}const steps=55,verts=[],ind=[];for(let j=0;j<=steps;j++){let z=landingStart+j;for(const x of [-8,8])verts.push(x,surface(z,0)+.04,z)}for(let j=0;j<steps;j++){let i=j*2;ind.push(i,i+2,i+1,i+1,i+2,i+3)}const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));geo.setIndex(ind);const uv=[];for(let j=0;j<=steps;j++)uv.push(0,j*.15,1,j*.15);geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.computeVertexNormals();let mesh=add(landingMesh,geo,new THREE.MeshStandardMaterial({map:earthTexture,roughness:1,side:THREE.DoubleSide}),0,0,0);mesh.material.side=THREE.DoubleSide;for(let z=landingStart;z<=landingStart+55;z+=4){for(let x of [-7.7,7.7]){let h=surface(z,0);box(landingMesh,.25,.3,2,dirt,x,h-.1,z)}}}
@@ -87,11 +97,28 @@ for(let i=0;i<frameNodes.length-1;i++)pipe(chassis,frameNodes[i],frameNodes[(i+1
 const motor=box(chassis,.6,.55,.6,black,0,1.08,-.15);const motorHead=add(chassis,new THREE.CylinderGeometry(.24,.29,.45,12),steel,0,1.33,-.15);motorHead.rotation.z=Math.PI/2;
 for(const x of [-.23,.23]){pipe(chassis,[x,1.43,.7],[x,.64,1.13],.063,chrome);pipe(chassis,[x,1.2,-.65],[x,.6,-1.08],.045,steel)}
 const tank=add(chassis,new THREE.SphereGeometry(.48,20,12),bikeBlue,0,1.65,.2);tank.scale.set(.94,.48,1.7);
-const seat=box(chassis,.67,.12,.98,black,0,1.73,-.63);const side1=box(chassis,.11,.37,.83,bikeWhite,-.32,1.47,-.45);const side2=box(chassis,.11,.37,.83,bikeWhite,.32,1.47,-.45);
+const seat=add(chassis,new THREE.SphereGeometry(.48,18,12),black,0,1.71,-.7);seat.scale.set(.7,.16,1.32);const side1=box(chassis,.11,.37,.83,bikeWhite,-.32,1.47,-.45);const side2=box(chassis,.11,.37,.83,bikeWhite,.32,1.47,-.45);
 const shroud=box(chassis,.62,.5,.32,bikeBlue,0,1.39,.72);shroud.rotation.x=.3;
-const frontGuard=box(chassis,.6,.11,1.13,bikeBlue,0,1.22,1.12);frontGuard.rotation.x=.13;
-const rearGuard=box(chassis,.62,.11,1.2,bikeWhite,0,1.54,-1.18);rearGuard.rotation.x=-.12;
+const frontGuard=box(chassis,.6,.11,1.13,bikeBlue,0,1.22,1.12);frontGuard.visible=false;
+const rearGuard=box(chassis,.62,.11,1.2,bikeWhite,0,1.54,-1.18);rearGuard.visible=false;
 pipe(chassis,[-.62,2.0,.99],[.62,2.0,.99],.045,chrome);for(const x of [-.39,.39])pipe(chassis,[x,1.52,1.02],[x,2,.99],.036,steel);
+
+function curvedFender(target,wheelZ,color,start,end,width,rad){
+ const verts=[],uv=[],indices=[],n=22;
+ for(let i=0;i<=n;i++){
+  const t=i/n,a=start+(end-start)*t;
+  const yz=[.59+rad*Math.cos(a),wheelZ+rad*Math.sin(a)];
+  const flare=1+.16*Math.sin(t*Math.PI);
+  for(const side of [-1,1]){verts.push(side*width*.5*flare,yz[0],yz[1]);uv.push(side>0?1:0,t)}
+ }
+ for(let i=0;i<n;i++){const k=i*2;indices.push(k,k+2,k+1,k+1,k+2,k+3)}
+ const geom=new THREE.BufferGeometry();geom.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+ geom.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geom.setIndex(indices);geom.computeVertexNormals();
+ const m=add(target,geom,color);m.material.side=THREE.DoubleSide;
+}
+curvedFender(chassis,1.1,bikeBlue,-.78,.90,.60,.79);
+curvedFender(chassis,-1.08,bikeWhite,-1.0,.82,.60,.73);
+
 const plate=box(chassis,.5,.45,.1,bikeWhite,0,1.7,1.17);plate.rotation.x=-.15;
 
 // Rider is articulated: a simple anatomical skeleton rather than a sliding rigid statue.
