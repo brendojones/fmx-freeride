@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#101715"><meta name="apple-mobile-web-app-capable" content="yes">
-<title>FMX Freeride — Prototype 0.7</title>
+<title>FMX Freeride — Prototype 0.8</title>
 <style>
 *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#121a18;color:white;font-family:system-ui,-apple-system,Arial,sans-serif;touch-action:none}canvas{display:block;touch-action:none}#game{position:absolute;inset:0}#hud{position:absolute;inset:0;pointer-events:none}.top{position:absolute;top:max(12px,env(safe-area-inset-top));left:18px;right:18px;display:flex;justify-content:space-between;gap:15px;text-shadow:0 2px 8px #0009}.brand{font-size:19px;font-weight:950;letter-spacing:.02em;font-style:italic}.brand b{color:#f5962f}.sub{font-size:9px;font-weight:800;letter-spacing:.18em;color:#d6dacb}.stats{text-align:right}.stats strong{font-size:32px;line-height:1;font-variant-numeric:tabular-nums}.stats span{font-size:11px;font-weight:800}.stats small{display:block;color:#f8b96d;font-weight:800;letter-spacing:.12em}#message{position:absolute;top:24%;width:100%;text-align:center;font-weight:900;font-size:22px;text-shadow:0 2px 12px #000;opacity:0;transition:opacity .25s;padding:0 25px}#message.visible{opacity:1}.toolbar{pointer-events:auto;position:absolute;top:85px;left:18px;display:flex;gap:7px}.toolbar button,.touch button{color:white;border:1px solid #ffffff53;background:#15211dbd;box-shadow:0 4px 18px #0005;backdrop-filter:blur(8px);font-weight:900;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}.toolbar button{padding:10px 13px;border-radius:8px;font-size:10px;letter-spacing:.07em}.touch{pointer-events:auto;position:absolute;bottom:max(20px,env(safe-area-inset-bottom));left:18px;right:18px;display:flex;align-items:end;justify-content:space-between;gap:12px}.touch .group{display:flex;gap:9px;align-items:end}.touch button{border-radius:50%;height:68px;width:68px;font-size:12px}.touch button.pressed{background:#f28b26e3;border-color:#ffe1b3;transform:scale(.97)}.touch .gas{height:96px;width:96px;background:#e7771bd6}.touch .flip{height:75px;width:75px;background:#303f35d9}.touch .brake{height:70px;width:70px}.touch .dir{font-size:24px}.bottom-note{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:9px;color:#ffffff8f;white-space:nowrap}.modal{position:absolute;inset:0;background:linear-gradient(110deg,#0b1411e8,#111b1bd7 45%,#17221ca9);display:grid;place-items:center;padding:22px;z-index:10}.panel{max-width:550px;width:100%;padding:24px 30px;border-left:5px solid #f5952f;background:#0d1815ce;box-shadow:0 15px 70px #0009}.eyebrow{color:#f4ae6b;font-size:11px;letter-spacing:.2em;font-weight:900}.panel h1{font-style:italic;font-size:clamp(43px,9vw,83px);line-height:.83;letter-spacing:-.07em;margin:16px 0 23px;font-weight:1000}.panel h1 em{color:#f3932e;font-style:inherit}.panel p{font-size:16px;line-height:1.5;color:#e1e7dd;max-width:420px}.start{border:0;background:#ee8b25;color:#10130f;padding:16px 28px;border-radius:5px;font-weight:950;font-size:16px;letter-spacing:.08em;margin:14px 0;cursor:pointer}.panel small{display:block;font-size:11px;line-height:1.7;color:#b6c5ba}.panel .disclaimer{color:#94a19b;margin-top:13px}.hidden{display:none!important}#error{position:absolute;inset:0;background:#131715;z-index:20;padding:40px;font-size:18px}#rotate{display:none;position:absolute;top:53%;left:50%;transform:translate(-50%,-50%);background:#101914d9;padding:12px 18px;border-radius:8px;font-size:13px;text-align:center;z-index:3;pointer-events:none}@media (orientation:portrait) and (max-width:700px){#rotate{display:block}.touch button{width:56px;height:56px}.touch .gas{width:75px;height:75px}.touch .flip{width:65px;height:65px}.touch .brake{width:60px;height:60px}.toolbar{top:73px;left:12px}.toolbar button{padding:8px}}@media (max-height:440px){.top{top:7px}.toolbar{top:57px}.touch{bottom:9px}.touch button{width:55px;height:55px}.touch .gas{height:70px;width:70px}.touch .flip{height:62px;width:62px}.touch .brake{height:56px;width:56px}.bottom-note{display:none}.panel{padding:12px 22px}.panel h1{font-size:45px;margin:8px 0}.panel p{font-size:12px;margin:7px 0}.start{padding:10px 20px;margin:7px 0}.panel small{font-size:9px}.panel .disclaimer{display:none}}
 .touch .trick-controls{gap:7px;justify-content:center}.touch .trick-controls button{width:72px;height:64px;border-radius:15px;background:#2b3c39d9;font-size:10px;letter-spacing:.02em}.touch .trick-controls button.pressed{background:#e78124ec}@media(max-height:440px){.touch .trick-controls button{width:63px;height:54px;font-size:9px}}@media(orientation:portrait) and (max-width:700px){.touch .trick-controls{flex-direction:column;gap:4px}.touch .trick-controls button{width:76px;height:36px;font-size:9px}} .model-state{color:#ffd8a4;margin-top:5px;letter-spacing:.07em;font-size:10px;font-weight:750}
@@ -61,13 +61,13 @@
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script></head><body>
 <div id="game"></div>
 <div id="hud">
-<div class="top"><div><div class="brand"><b>FMX</b> FREERIDE</div><div class="sub">AUSTRALIAN PRACTICE COMPOUND • V0.7</div><div class="sub model-state" id="bike-quality">LOADING DETAILED BIKE…</div></div><div class="stats"><strong id="speed">0</strong> <span>KM/H</span><small id="gapLabel">ONE JUMP • FREERIDE</small><small id="tricks">CLEAN LANDINGS: 0</small></div></div>
+<div class="top"><div><div class="brand"><b>FMX</b> FREERIDE</div><div class="sub">AUSTRALIAN PRACTICE COMPOUND • V0.8</div><div class="sub model-state" id="bike-quality">LOADING DETAILED BIKE…</div></div><div class="stats"><strong id="speed">0</strong> <span>KM/H</span><small id="gapLabel">ONE JUMP • FREERIDE</small><small id="tricks">CLEAN LANDINGS: 0</small></div></div>
 <div id="message" role="status" aria-live="polite"></div>
 <div class="toolbar"><button id="camera" aria-label="Change camera view">CAMERA</button><button id="quality" aria-label="Change graphics quality">HD</button><button id="reset" aria-label="Reset motorcycle">RESET ↺</button></div>
 <div class="touch"><div class="group steer-controls"><button class="dir" data-control="left" aria-label="Steer left">◀</button><button class="dir" data-control="right" aria-label="Steer right">▶</button></div><div class="group trick-controls"><button class="flip" data-control="flip">FLIP</button><button class="flip" data-control="superman">SUPERMAN</button><button class="flip" data-control="whip">WHIP</button></div><div class="group riding-controls"><button class="brake" data-control="brake">BRAKE</button><button class="gas" data-control="gas">THROTTLE</button></div></div>
 <div class="bottom-note">IPHONE FREERIDE • DRAG SCENERY TO ADJUST CAMERA</div></div>
 <div id="rotate">↻ Rotate your phone to landscape for the best ride</div>
-<div id="welcome" class="modal"><div class="panel"><div class="eyebrow">ORIGINAL 3D FREESTYLE MOTOCROSS</div><h1>FMX<br><em>FREERIDE.</em></h1><p>One jump. One detailed bike. Three freestyle tricks. Full throttle.</p><button class="start" id="start">START RIDING →</button><small>Designed for iPhone: use your thumbs to steer, accelerate and perform tricks. Swipe over the scenery to adjust the riding camera. Rotate your phone sideways for the best view.</small><small class="disclaimer">Phone-first graphics preview. One ramp, one landing, and three tricks. Detailed motorcycle model loading depends on your connection; physics and rider remain experimental.</small></div></div>
+<div id="welcome" class="modal"><div class="panel"><div class="eyebrow">ORIGINAL 3D FREESTYLE MOTOCROSS</div><h1>FMX<br><em>FREERIDE.</em></h1><p>One takeoff. One natural dirt landing. One rider. We're refining the important details first.</p><button class="start" id="start">START RIDING →</button><small>Designed for iPhone: use your thumbs to steer, accelerate and perform tricks. Swipe over the scenery to adjust the riding camera. Rotate your phone sideways for the best view.</small><small class="disclaimer">Phone-first graphics preview. One ramp, one landing, and three tricks. Detailed motorcycle model loading depends on your connection; physics and rider remain experimental.</small></div></div>
 <div id="error" class="hidden"><h2>Can't load the 3D game</h2><p>Please check your internet connection, then reload the page in Safari or Chrome.</p></div>
 <script type="module">
 import * as THREE from 'three';
@@ -182,7 +182,23 @@ function updateDust(q,dt){
  contactShadow.scale.setScalar(1+height*.1);
 }
 
-function surface(z,x){if(Math.abs(x)<2.15&&z>=61&&z<=75){const t=(z-61)/14;return 4.45*(t*t*(3-2*t));}if(z>=landingStart&&z<=landingStart+55&&Math.abs(x)<7){let t=z-landingStart;return t<15?1.1+(4.8-1.1)*(t/15):Math.max(.07,4.8-(t-15)*4.7/40)}return 0}
+// One sculpted dirt lander; the same height field feeds rendering and riding.
+const smooth=(a,b,t)=>{const u=THREE.MathUtils.clamp((t-a)/(b-a),0,1);return u*u*(3-2*u)};
+function dirtLanderHeight(z,x){
+ const t=z-landingStart, lateral=1-smooth(6.4,15.5,Math.abs(x));
+ if(t< -9||t>64||lateral<=0)return 0;
+ let core;
+ if(t<0)core=1.08*smooth(-9,0,t);
+ else if(t<12)core=1.08+(4.65-1.08)*smooth(0,12,t);
+ else if(t<17)core=4.65;
+ else core=4.65*(1-smooth(17,64,t));
+ const rough=0.038*Math.sin(z*.72+x*.30)+0.024*Math.sin(z*1.89-x*.8);
+ return Math.max(0,(core+rough*smooth(-8,-2,t)*smooth(65,59,t))*lateral);
+}
+function surface(z,x){
+ if(Math.abs(x)<2.15&&z>=61&&z<=75){const t=(z-61)/14;return 4.45*(t*t*(3-2*t))}
+ return dirtLanderHeight(z,x);
+}
 const landingStart=75+22.86;
 
 function brushedSteelTexture(){
@@ -197,7 +213,48 @@ const steelDeckMat=new THREE.MeshStandardMaterial({map:brushedSteelTexture(),col
 function ramp(){const g=new THREE.Group();scene.add(g);const segments=28;const vs=[],idx=[];for(let j=0;j<=segments;j++){const z=61+j*14/segments,y=4.45*Math.pow(j/segments,2)*(3-2*j/segments);for(const x of [-2.15,2.15])vs.push(x,y+.05,z)}for(let j=0;j<segments;j++){const k=j*2;idx.push(k,k+2,k+1,k+1,k+2,k+3)}const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(vs,3));geo.setIndex(idx);const rampUV=[];for(let j=0;j<=segments;j++)rampUV.push(0,j/segments,1,j/segments);geo.setAttribute('uv',new THREE.Float32BufferAttribute(rampUV,2));geo.computeVertexNormals();let deck=add(g,geo,steelDeckMat,0,0,0);deck.material.side=THREE.DoubleSide;for(const x of [-2,2]){for(let j=0;j<12;j++){const z=61+j*1.15,h=surface(z,0);pipe(g,[x,0,z],[x,h,z],.048,chrome)}pipe(g,[x,0,61],[x,4.45,75],.07,chrome)}for(let j=0;j<7;j++){let z=61+j*2.2;pipe(g,[-2.2,0,z],[2.2,0,z],.05,steel)}for(let j=0;j<16;j++){let z=61+j*.9;pipe(g,[-2.15,surface(z,0)+.04,z],[2.15,surface(z,0)+.04,z],.012,chrome)}return g}
 ramp();
 let landingMesh=new THREE.Group();scene.add(landingMesh);
-function rebuildLanding(){while(landingMesh.children.length){let o=landingMesh.children.pop();o.parent=null;o.geometry?.dispose()}const steps=55,verts=[],ind=[];for(let j=0;j<=steps;j++){let z=landingStart+j;for(const x of [-8,8])verts.push(x,surface(z,0)+.04,z)}for(let j=0;j<steps;j++){let i=j*2;ind.push(i,i+2,i+1,i+1,i+2,i+3)}const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));geo.setIndex(ind);const uv=[];for(let j=0;j<=steps;j++)uv.push(0,j*.15,1,j*.15);geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.computeVertexNormals();let mesh=add(landingMesh,geo,new THREE.MeshStandardMaterial({map:earthTexture,roughness:1,side:THREE.DoubleSide}),0,0,0);mesh.material.side=THREE.DoubleSide;for(let z=landingStart;z<=landingStart+55;z+=4){for(let x of [-7.7,7.7]){let h=surface(z,0);box(landingMesh,.25,.3,2,dirt,x,h-.1,z)}}}
+function rebuildLanding(){
+ for(const child of [...landingMesh.children]){
+  landingMesh.remove(child);child.geometry?.dispose();if(child.material?.userData?.ownedByLander)child.material.dispose();
+ }
+ const across=52,along=118,verts=[],uv=[],indices=[],colors=[];
+ const tint=new THREE.Color();
+ for(let j=0;j<=along;j++){
+  const z=landingStart-10+j*(76/along);
+  for(let i=0;i<=across;i++){
+   const x=-16+i*(32/across);
+   const h=dirtLanderHeight(z,x);
+   verts.push(x,h+.014,z);
+   uv.push(i*.24,j*.16);
+   const r=.92+.07*Math.sin(x*.33+z*.19)+.055*Math.sin(x*1.8+z*.57);
+   tint.setRGB(.94,.90,.82).multiplyScalar(r);
+   colors.push(tint.r,tint.g,tint.b);
+  }
+ }
+ for(let j=0;j<along;j++)for(let i=0;i<across;i++){
+  const k=j*(across+1)+i;
+  indices.push(k,k+across+1,k+1,k+1,k+across+1,k+across+2);
+ }
+ const geo=new THREE.BufferGeometry();
+ geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+ geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+ geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+ geo.setIndex(indices);geo.computeVertexNormals();
+ const material=new THREE.MeshStandardMaterial({map:earthTexture,vertexColors:true,roughness:1,side:THREE.DoubleSide});
+ material.userData.ownedByLander=true;
+ add(landingMesh,geo,material);
+ // Two subtle worn tyre tracks run down the centre, following the sculpted dirt.
+ const tyreMat=mat('#765940',1);
+ for(const x of [-.62,.62]){
+  const points=[];
+  for(let j=0;j<=64;j++){
+   const z=landingStart+4+j*.75;
+   points.push(new THREE.Vector3(x+.045*Math.sin(j*.55),dirtLanderHeight(z,x)+.036,z));
+  }
+  const rut=add(landingMesh,new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),80,.037,5,false),tyreMat,0,0,0,false);
+  rut.receiveShadow=false;
+ }
+}
 rebuildLanding();
 
 function treeAt(x,z,height){
@@ -375,14 +432,24 @@ const torsoProfile=[
 ];
 rig.torso=add(rider,new THREE.LatheGeometry(torsoProfile,28),jersey);
 rig.torso.scale.set(1.0,1.02,.73);
-rig.chest=add(rider,new THREE.SphereGeometry(.32,16,12),accent);rig.chest.scale.set(.92,.62,.32);
+rig.chest=add(rider,new THREE.SphereGeometry(.29,24,16),jersey);rig.chest.scale.set(.89,.63,.52);
 rig.helmet=new THREE.Group();rider.add(rig.helmet);
 add(rig.helmet,new THREE.SphereGeometry(.32,20,14),helmet,0,0,0);
 add(rig.helmet,new THREE.SphereGeometry(.33,20,14,0,Math.PI*2,0,Math.PI*.42),helmetTrim,0,.06,0);
 const goggles=add(rig.helmet,new THREE.SphereGeometry(.29,18,10),goggle,0,.017,.17);goggles.scale.set(.9,.27,.6);
 const peak=add(rig.helmet,new THREE.SphereGeometry(.25,14,10),bikeBlue,0,.21,.21);peak.scale.set(1.04,.18,1.15);
 rig.limbs=[];
-function limb(radius,matl){let m=add(rider,new THREE.CapsuleGeometry(radius,.9-2*radius,5,11),matl);rig.limbs.push(m);return m}
+function limb(radius,matl){
+ // Rounded tapered anatomical mesh: wider around muscle, narrower at wrists / ankles.
+ const profile=[
+ new THREE.Vector2(.04,-.46),new THREE.Vector2(radius*.70,-.42),
+ new THREE.Vector2(radius*.93,-.29),new THREE.Vector2(radius*1.08,-.10),
+ new THREE.Vector2(radius*1.05,.11),new THREE.Vector2(radius*.90,.33),
+ new THREE.Vector2(.04,.46)
+ ];
+ const m=add(rider,new THREE.LatheGeometry(profile,22),matl);
+ rig.limbs.push(m);return m;
+}
 rig.leftArmUpper=limb(.126,jersey);rig.rightArmUpper=limb(.126,jersey);
 rig.leftArmLower=limb(.093,suit);rig.rightArmLower=limb(.093,suit);
 rig.leftLegUpper=limb(.18,suit);rig.rightLegUpper=limb(.18,suit);
@@ -485,6 +552,39 @@ function loadBikeAsset(index=0){
 }
 loadBikeAsset();
 
+
+// Narrow shoulder guards and realistic ventilation details accent the protective jersey.
+const shoulderPads={};
+for(const side of [-1,1]){
+ const name=side<0?'left':'right';
+ const pad=add(rider,new THREE.SphereGeometry(.17,18,12),jersey);
+ pad.scale.set(1.20,.83,.84);
+ shoulderPads[name]=pad;
+ const padAccent=add(pad,new THREE.SphereGeometry(.17,14,9),helmetTrim,0,.25,0);
+ padAccent.scale.set(.35,.12,.40);
+}
+const chestZip=add(rig.torso,new THREE.CylinderGeometry(.012,.012,.55,6),darkPlastic,0,.0,.285);
+const jerseySeamMat=mat('#e1ece9',.9);
+for(const side of [-1,1]){
+ const sleeveSeam=add(rig.torso,new THREE.CapsuleGeometry(.015,.3,3,7),jerseySeamMat,side*.24,.24,-.16);
+ sleeveSeam.rotation.z=side*.4;
+}
+// Back protector with hand-drawn, original jersey graphics and number.
+function createJerseyBack(){
+ const c=document.createElement('canvas');c.width=512;c.height=512;const ctx=c.getContext('2d');
+ ctx.clearRect(0,0,512,512);
+ ctx.fillStyle='#f1e8d8';ctx.beginPath();ctx.moveTo(55,56);ctx.lineTo(460,56);ctx.lineTo(416,443);ctx.lineTo(97,443);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#173947';ctx.beginPath();ctx.moveTo(72,62);ctx.lineTo(210,62);ctx.lineTo(124,441);ctx.lineTo(94,441);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#f58b25';ctx.beginPath();ctx.moveTo(422,68);ctx.lineTo(456,68);ctx.lineTo(405,439);ctx.lineTo(340,439);ctx.closePath();ctx.fill();
+ ctx.textAlign='center';ctx.textBaseline='middle';
+ ctx.lineJoin='round';ctx.strokeStyle='#101d23';ctx.lineWidth=16;
+ ctx.font='italic 900 212px Arial,sans-serif';ctx.strokeText('11',255,285);ctx.fillStyle='#e98524';ctx.fillText('11',255,285);
+ ctx.fillStyle='#233f48';ctx.font='bold 38px Arial,sans-serif';ctx.fillText('FMX FREERIDE',255,391);
+ const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=8;return tex;
+}
+const jerseyBack=sticker(rig.torso,createJerseyBack(),.46,.56,0,-.012,-.245,Math.PI);
+jerseyBack.material.depthTest=true;
+
 const unitY=new THREE.Vector3(0,1,0);
 function poseBone(mesh,a,b){const va=new THREE.Vector3(...a),vb=new THREE.Vector3(...b),delta=vb.clone().sub(va);mesh.position.copy(va).add(vb).multiplyScalar(.5);mesh.quaternion.setFromUnitVectors(unitY,delta.clone().normalize());mesh.scale.y=delta.length()/.9}
 function lerp3(a,b,p){return a.map((v,i)=>v+(b[i]-v)*p)}
@@ -502,6 +602,7 @@ function updateRiderPose(p,dt){
  for(let side of [-1,1]){
   const label=side<0?'left':'right',x=side*.27;
   const sh=lerp3([x,2.48,-.27],[x,2.43,-.06],t);
+  shoulderPads[label].position.set(...sh);
   const elbow=lerp3([side*.42,2.1,.19],[side*.50,2.17,.34],t);
   const hand=[side*.52,2.02,.99];
   const knee=lerp3([side*.32,1.37,-.49],[side*.32,2.22,-2.19],t);
