@@ -70,7 +70,7 @@ body.started #rotate{display:none!important}
 <div id="message" role="status" aria-live="polite"></div>
 <div class="toolbar"><button id="camera" aria-label="Change camera view">CAMERA</button><button id="quality" aria-label="Change graphics quality">HD</button><button id="reset" aria-label="Reset motorcycle">RESET ↺</button></div>
 <div class="touch"><div class="group steer-controls"><button class="dir" data-control="left" aria-label="Lean backward">↶</button><button class="dir" data-control="right" aria-label="Lean forward">↷</button></div><div class="group trick-controls"><button class="flip" data-control="flip">FLIP</button><button class="flip" data-control="superman">SUPERMAN</button><button class="flip" data-control="whip">WHIP</button></div><div class="group riding-controls"><button class="brake" data-control="brake">BRAKE</button><button class="gas" data-control="gas">THROTTLE</button></div></div>
-<div class="bottom-note">RIGHT-TO-LEFT? NO — NOW RIDING THE OPPOSITE WAY • FMX ONLY</div></div>
+<div class="bottom-note">ONE FREESTYLE LINE • FOUR JUMP FEATURES</div></div>
 <div id="rotate">↻ Rotate your phone to landscape for the best ride</div>
 <div id="welcome" class="modal"><div class="panel"><div class="eyebrow">SIDE-ON FREESTYLE • IPHONE EXPERIMENT</div><h1>FMX<br><em>SIDE STAGE.</em></h1><p>A proper side-on freestyle line: dirt rollers, a tabletop, a steel FMX kicker and a step-down.</p><button class="start" id="start">START RIDING →</button><small>Made for your phone. Throttle, brake, lean backward/forward and hold a trick button in the air. Rotate sideways for the best view.</small><small class="disclaimer">iPhone-first freestyle compound. Original 3D assets where available, curved earthworks and one clear side camera. Rider and physics are still experimental.</small></div></div>
 <div id="error" class="hidden"><h2>Can't load the 3D game</h2><p>Please check your internet connection, then reload the page in Safari or Chrome.</p></div>
@@ -81,7 +81,7 @@ const $=id=>document.getElementById(id), scene=new THREE.Scene();scene.backgroun
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,700);
 const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.06;$('game').appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xdfefff,0x746951,1.45));const sun=new THREE.DirectionalLight(0xffe1b6,2.65);sun.position.set(-65,115,22);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-140;sun.shadow.camera.right=140;sun.shadow.camera.top=155;sun.shadow.camera.bottom=-115;sun.shadow.normalBias=.035;scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xdfefff,0x746951,1.45));const sun=new THREE.DirectionalLight(0xffe1b6,2.65);sun.position.set(-65,115,22);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-37;sun.shadow.camera.right=37;sun.shadow.camera.top=42;sun.shadow.camera.bottom=-42;sun.shadow.normalBias=.035;scene.add(sun);
 const mat=(color,roughness=1,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
 const dirt=mat('#956d4d'),dirtLight=mat('#b58b62'),grass=mat('#647351'),darkGrass=mat('#526a46'),steel=mat('#636e72',.46,.7),chrome=mat('#b4b9ba',.25,.75),rubber=mat('#151a1b'),black=mat('#252c2a'),bikeBlue=mat('#096eb1',.38,.23),bikeWhite=mat('#e0e5e2',.45),orange=mat('#f58b23',.47),skin=mat('#d5a17d'),gear=mat('#1b272c'),goggle=mat('#171c20',.15,.25),helmet=mat('#e9ecdd',.3);
 const add=(parent,geo,material,x=0,y=0,z=0,shadow=true)=>{const obj=new THREE.Mesh(geo,material);obj.position.set(x,y,z);obj.castShadow=shadow;obj.receiveShadow=true;parent.add(obj);return obj};
@@ -284,6 +284,93 @@ function rebuildLanding(){
  }
 }
 rebuildLanding();
+
+// MOBILE 2.5D TERRAIN. One high-resolution height field for the full riding
+// line; the independent detailed main lander is drawn in its own mesh.
+// The 3D surface uses the exact same dirtCourseHeight() as wheel collision.
+track.visible=false;
+function makeLateralFade(){
+ const c=document.createElement('canvas');c.width=256;c.height=32;
+ const ctx=c.getContext('2d');
+ const gradient=ctx.createLinearGradient(0,0,256,0);
+ gradient.addColorStop(0,'#000');gradient.addColorStop(.16,'#444');
+ gradient.addColorStop(.31,'#fff');gradient.addColorStop(.69,'#fff');
+ gradient.addColorStop(.84,'#444');gradient.addColorStop(1,'#000');
+ ctx.fillStyle=gradient;ctx.fillRect(0,0,256,32);
+ const t=new THREE.CanvasTexture(c);t.wrapT=THREE.RepeatWrapping;return t;
+}
+const lateralFade=makeLateralFade();
+function createCourseStrip(zStart,zFinish){
+ const cols=60,rows=Math.ceil((zFinish-zStart)*1.7);
+ const vertices=[],uv=[],indices=[],colors=[];
+ const tint=new THREE.Color();
+ for(let j=0;j<=rows;j++){
+  const z=zStart+(zFinish-zStart)*j/rows;
+  for(let i=0;i<=cols;i++){
+   const x=-17+34*i/cols;
+   const h=dirtCourseHeight(z,x);
+   const micro=(.021*Math.sin(z*1.53+x*.93)+.016*Math.sin(x*2.11-z*.59));
+   vertices.push(x,Math.max(.034,h+micro*Math.max(0,Math.min(1,h))+.06),z);
+   uv.push(i/cols,j*.115);
+   const shade=.96+.025*Math.sin(z*.4+x*.3)+.02*Math.sin(x*1.2+z*.17);
+   tint.setRGB(shade,shade*.97,shade*.93);colors.push(tint.r,tint.g,tint.b);
+  }
+ }
+ for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){
+  const k=j*(cols+1)+i;
+  indices.push(k,k+cols+1,k+1,k+1,k+cols+1,k+cols+2);
+ }
+ const geo=new THREE.BufferGeometry();
+ geo.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
+ geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+ geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+ geo.setIndex(indices);geo.computeVertexNormals();
+ const material=new THREE.MeshStandardMaterial({
+  map:earthTexture,alphaMap:lateralFade,transparent:true,
+  depthWrite:true,alphaTest:.055,vertexColors:true,
+  roughness:1,side:THREE.DoubleSide
+ });
+ const m=add(scene,geo,material,0,0,0,false);
+ m.receiveShadow=true;
+ return m;
+}
+createCourseStrip(3,113);
+createCourseStrip(130,151);
+createCourseStrip(220,317);
+// A bevelled crown on the earthworks: grooves and side shaping are derived
+// from the same surface used by the bike. Nothing can be ridden invisibly.
+function placedLetterBoard(label,z,x=-11.3){
+ const c=document.createElement('canvas');c.width=512;c.height=144;
+ const ctx=c.getContext('2d');
+ ctx.fillStyle='#182b30';ctx.beginPath();ctx.roundRect(2,2,508,140,13);ctx.fill();
+ ctx.strokeStyle='#d6a36f';ctx.lineWidth=5;ctx.stroke();
+ ctx.fillStyle='#f3f1df';ctx.textAlign='center';ctx.textBaseline='middle';
+ ctx.font='bold 49px Arial,sans-serif';ctx.fillText(label,256,79,480);
+ const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;
+ const board=add(scene,new THREE.PlaneGeometry(3.7,1.04),
+  new THREE.MeshBasicMaterial({map:tx,transparent:true,side:THREE.DoubleSide}),x,2.55,z,false);
+ board.rotation.y=-Math.PI/2;
+ const steelMat=mat('#565c57',.54,.67);
+ pipe(scene,[x,0,z-1.25],[x,2.2,z-1.25],.045,steelMat);
+ pipe(scene,[x,0,z+1.25],[x,2.2,z+1.25],.045,steelMat);
+}
+placedLetterBoard('WARM UP',28);
+placedLetterBoard('DIRT TABLETOP',71);
+placedLetterBoard('FMX KICKER',121);
+placedLetterBoard('STEP DOWN',244);
+// An uncluttered soft-color distant sky with a warmer horizon. Per-vertex
+// interpolation avoids an expensive fragment shader on mobile.
+const domeGeo=new THREE.SphereGeometry(460,32,18);
+const skyColors=[];const skyColorLow=new THREE.Color('#d3cfb8'),skyColorHigh=new THREE.Color('#7ba6c6'),skyColorBottom=new THREE.Color('#d6ccac');
+for(let i=0;i<domeGeo.attributes.position.count;i++){
+ const y=domeGeo.attributes.position.getY(i)/460;
+ const c=(y>=0?skyColorLow.clone().lerp(skyColorHigh,Math.sqrt(Math.min(1,y))):skyColorLow.clone().lerp(skyColorBottom,Math.min(1,-y)));
+ skyColors.push(c.r,c.g,c.b);
+}
+domeGeo.setAttribute('color',new THREE.Float32BufferAttribute(skyColors,3));
+const skySphere=new THREE.Mesh(domeGeo,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,depthWrite:false,fog:false}));
+skySphere.frustumCulled=false;scene.add(skySphere);
+
 
 function treeAt(x,z,height){
  const holder=new THREE.Group();holder.position.set(x,0,z);scene.add(holder);
@@ -716,7 +803,7 @@ function animate(now){requestAnimationFrame(animate);const dt=Math.min(.035,Math
 if(started&&!posBike.crashed){
  const q=posBike;let thrust=keys.gas?1:0,braking=keys.brake?1:0;if(!q.air){q.super=THREE.MathUtils.damp(q.super,0,8,dt);q.whip=THREE.MathUtils.damp(q.whip,0,8,dt)}
  q.speed+=((thrust?8.9:0)-(braking?15:0)-(!thrust&&!braking?2.2:0)-q.speed*.095)*dt;
- q.speed=THREE.MathUtils.clamp(q.speed,-3,34);
+ q.speed=THREE.MathUtils.clamp(q.speed,-3,31);
  if(!q.air&&q.speed<0&&!keys.brake)q.speed=0;
  const lean=(keys.right?1:0)-(keys.left?1:0);
  q.yaw=0;q.x=0;
@@ -732,11 +819,11 @@ if(started&&!posBike.crashed){
    q.pitch=THREE.MathUtils.damp(q.pitch,-Math.atan(slope),5.7,dt);
   }
   if(leavingStep){
-   q.air=true;q.lastTakeoff='STEP';q.y=2.5;q.vy=q.speed*.24;
+   q.air=true;q.lastTakeoff='STEP';q.y=2.5;q.vy=q.speed*.17;
    q.rot=0;q.peakSuper=0;q.peakWhip=0;airStart=now;notify('STEP-DOWN • THROW A TRICK',1.8);
   }
   if(oldZ<130&&q.z>=130&&Math.abs(q.x)<2.05&&q.speed>8&&Math.abs(q.yaw)<.42){
-   q.air=true;q.lastTakeoff='FMX';q.y=4.45;q.vy=q.speed*.40;q.pitch=-.3;q.rot=0;q.peakSuper=0;q.peakWhip=0;airStart=now;notify('AIRBORNE • HOLD FLIP TO ROTATE',1.8);
+   q.air=true;q.lastTakeoff='FMX';q.y=4.45;q.vy=q.speed*.36;q.pitch=-.3;q.rot=0;q.peakSuper=0;q.peakWhip=0;airStart=now;notify('AIRBORNE • HOLD FLIP TO ROTATE',1.8);
   }
  }else{
   q.vy-=9.81*dt;q.y+=q.vy*dt;
@@ -745,7 +832,7 @@ if(started&&!posBike.crashed){
   if(q.y<=ground&&q.vy<0){
    const angle=Math.atan2(Math.sin(q.pitch),Math.cos(q.pitch));
    const completed=Math.round(q.rot/(Math.PI*2));const aligned=Math.abs(angle)<.64&&q.super<.3&&q.whip<.33;
-   if((q.lastTakeoff!=='FMX'||(Math.abs(q.x)<7&&q.z>landingStart&&q.z<landingStart+66))&&aligned&&q.speed>8){
+   if((q.lastTakeoff!=='FMX'||(Math.abs(q.x)<7&&q.z>landingStart&&q.z<landingStart+80))&&aligned&&q.speed>8){
     q.air=false;q.y=ground;q.pitch=0;q.vy=0;clean++;
     $('tricks').textContent='CLEAN LANDINGS: '+clean;
     const tricks=[];if(completed>0)tricks.push(completed+' BACKFLIP'+(completed>1?'S':''));if(q.peakSuper>.65)tricks.push('SUPERMAN');if(q.peakWhip>.65)tricks.push('WHIP');notify(tricks.length?'LANDED: '+tricks.join(' + ')+'!':'CLEAN LANDING!');
@@ -760,6 +847,9 @@ if(started&&!posBike.crashed){
  $('speed').textContent=Math.max(0,Math.round(q.speed*3.6));
 }else{bike.position.set(posBike.x,posBike.y,posBike.z);bike.rotation.y=posBike.yaw}
 // Dedicated 2.5D camera: keep the 3D model fully visible from its side.
+sun.position.set(-56,83,posBike.z-19);
+sun.target.position.set(0,0,posBike.z);
+sun.target.updateMatrixWorld();
 const q=posBike,portrait=innerHeight>innerWidth;
 const dist=viewMode===0?(portrait?23.5:15.0):(portrait?32:22);
 const lookZ=q.z+(q.air?5.0:10.0);
