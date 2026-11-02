@@ -89,7 +89,7 @@ for(let i=0;i<8;i++){
 }
 for(let i=0;i<18;i++){const x=(i%2?1:-1)*(11+rnd(i)*12),z=(i*17)%230-30;const rock=add(scene,new THREE.DodecahedronGeometry(.55+rnd(i+10)*1,0),mat(i%2?'#6d675d':'#867668'),x,.33,z,false);rock.scale.y=.48}
 for(let i=0;i<9;i++){const z=35+i*15;pipe(scene,[-18,0,z],[-18,1.3,z],.09,steel);pipe(scene,[18,0,z],[18,1.3,z],.09,steel)}for(const x of [-18,18])pipe(scene,[x,1.3,35],[x,1.3,160],.06,steel);
-const bike=new THREE.Group();scene.add(bike);const chassis=new THREE.Group();bike.add(chassis);
+const bike=new THREE.Group();scene.add(bike);const tiltGroup=new THREE.Group();tiltGroup.position.y=1.21;bike.add(tiltGroup);const chassis=new THREE.Group();chassis.position.y=-1.21;tiltGroup.add(chassis);
 const wheels=[];function wheel(z){const group=new THREE.Group();group.position.set(0,.59,z);chassis.add(group);const tire=add(group,new THREE.TorusGeometry(.53,.115,12,38),rubber);tire.rotation.y=Math.PI/2;const rim=add(group,new THREE.TorusGeometry(.37,.028,8,32),chrome);rim.rotation.y=Math.PI/2;const disc=add(group,new THREE.CylinderGeometry(.17,.17,.075,20),steel);disc.rotation.z=Math.PI/2;for(let i=0;i<16;i++){const a=i*Math.PI/8;pipe(group,[0,0,0],[0,Math.sin(a)*.37,Math.cos(a)*.37],.012,chrome)}wheels.push(group)}
 wheel(-1.08);wheel(1.10);
 const frameNodes=[[0,1.15,-.3],[0,.84,.35],[0,1.48,.4],[0,1.1,-.8],[0,1.16,.6]];
@@ -310,7 +310,7 @@ const posBike={x:0,y:0,z:8,yaw:0,speed:0,vy:0,pitch:0,air:false,rot:0,crashed:fa
 let clean=0,camDist=8.8,started=false,toastTimer=0,airStart=0;
 const keys={left:false,right:false,gas:false,brake:false,flip:false,superman:false,whip:false};
 function notify(message,duration=2.2){$('message').textContent=message;$('message').classList.add('visible');toastTimer=duration}
-function reset(withNotice=true){Object.assign(posBike,{x:0,y:0,z:8,yaw:0,speed:0,vy:0,pitch:0,air:false,rot:0,crashed:false,super:0,whip:0,peakSuper:0,peakWhip:0});updateRiderPose(0,0);if(withNotice)notify('BACK ON THE BIKE')}
+function reset(withNotice=true){Object.assign(posBike,{x:0,y:0,z:8,yaw:0,speed:0,vy:0,pitch:0,air:false,rot:0,crashed:false,super:0,whip:0,peakSuper:0,peakWhip:0});updateRiderPose(0,0);tiltGroup.rotation.set(0,0,0);if(withNotice)notify('BACK ON THE BIKE')}
 function crash(){posBike.crashed=true;posBike.speed=0;notify('CRASH! TAP RESET TO TRY AGAIN',5)}
 const bindings={ArrowUp:'gas',KeyW:'gas',ArrowDown:'brake',KeyS:'brake',ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',Space:'flip',KeyQ:'superman',KeyE:'whip'};
 window.addEventListener('keydown',e=>{if(e.code in bindings){keys[bindings[e.code]]=true;e.preventDefault()}if(!e.repeat&&e.code==='KeyR')reset();if(!e.repeat&&e.code==='KeyC')switchCamera()});
@@ -357,7 +357,7 @@ if(started&&!posBike.crashed){
  }
  if(Math.abs(q.x)>175||q.z>330||q.z< -100)reset();
  for(let i=0;i<wheels.length;i++)wheels[i].rotation.x+=q.speed*dt/.53;
- bike.position.set(q.x,q.y,q.z);bike.rotation.set(0,q.yaw,0);chassis.rotation.x=q.pitch;chassis.rotation.z=THREE.MathUtils.damp(chassis.rotation.z,-steer*(q.air?.055:.18),7,dt);chassis.rotation.y=THREE.MathUtils.damp(chassis.rotation.y,q.air?q.whip*.72:0,6,dt);updateRiderPose(q.super,dt);
+ bike.position.set(q.x,q.y,q.z);bike.rotation.set(0,q.yaw,0);tiltGroup.rotation.x=q.pitch;tiltGroup.rotation.z=THREE.MathUtils.damp(tiltGroup.rotation.z,-steer*(q.air?.055:.18),7,dt);tiltGroup.rotation.y=THREE.MathUtils.damp(tiltGroup.rotation.y,q.air?q.whip*.72:0,6,dt);updateRiderPose(q.super,dt);
  $('speed').textContent=Math.max(0,Math.round(q.speed*3.6));
 }else{bike.position.set(posBike.x,posBike.y,posBike.z);bike.rotation.y=posBike.yaw}
 const q=posBike,behind=new THREE.Vector3(q.x-Math.sin(q.yaw)*camDist, q.y+camDist*.32+1.8,q.z-Math.cos(q.yaw)*camDist);camera.position.lerp(behind,Math.min(1,dt*4));const target=new THREE.Vector3(q.x,q.y+1.78,q.z+Math.cos(q.yaw)*3.2);camera.lookAt(target);
