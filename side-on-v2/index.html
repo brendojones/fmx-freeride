@@ -813,7 +813,7 @@ $('quality').onclick=()=>{
  $('quality').textContent=graphicsHigh?'HD':'SMOOTH';
  notify(graphicsHigh?'HIGH DETAIL':'SMOOTH PERFORMANCE',1.7);
 };
-$('start').onclick=()=>{started=true;$('welcome').classList.add('hidden');notify('LINE IT UP • BUILD SPEED • HIT THE RAMP',3)};
+$('start').onclick=()=>{started=true;document.body.classList.add('started');$('welcome').classList.add('hidden');notify('FOUR FREESTYLE FEATURES • LET IT RIP!',2.7)};
 let last=performance.now();const clock=new THREE.Clock();
 function animate(now){requestAnimationFrame(animate);const dt=Math.min(.035,Math.max(.001,(now-last)/1000));last=now;
 if(started&&!posBike.crashed){
