@@ -42,6 +42,17 @@ footer{background:#102028;border-top:1px solid #ffffff20;flex:none;max-height:40
 input[type=range]{width:100%;accent-color:#ffaf5b;margin:6px 0 0}
 #fileStatus{font-size:10px;color:#b6c4c2;line-height:1.4;margin-top:7px}
 #fileStatus.error{color:#ffaaa2}
+.model-instructions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px}
+.model-instructions>div{background:#213037;border-radius:10px;padding:9px 11px;border:1px solid #ffffff21;display:flex;flex-direction:column;gap:5px}
+.model-instructions strong{font-size:11px;color:#f4ba72}
+.model-instructions span{font-size:10px;color:#d5e1dc;line-height:1.45}
+.model-instructions a{font-size:10px;font-weight:850;color:#152326;background:#efb36e;text-decoration:none;border-radius:8px;padding:8px 10px;text-align:center;margin-top:auto}
+.actions-fit{display:flex;gap:8px;margin-top:7px;flex-wrap:wrap}
+.actions-fit button{background:#354e52;border:1px solid #e9ead945;color:#eef1e9;font-size:11px;font-weight:800;border-radius:8px;padding:9px 11px}
+.actions-fit button:disabled{opacity:.37;cursor:not-allowed}
+@media(max-width:620px){.model-instructions{grid-template-columns:1fr}}
+@media(orientation:landscape) and (max-height:500px){.model-instructions{grid-template-columns:1fr 1fr}.model-instructions span{font-size:9px}.model-instructions>div{padding:6px 8px}}
+
 #fitting .note{font-size:10px;color:#f7ca94;margin-top:6px}
 @media(max-width:620px){.fitting-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.version{display:none}nav{padding:6px}nav button{padding:10px 4px}}
 @media(orientation:landscape) and (max-height:500px){header{padding-top:5px;padding-bottom:4px}h1{font-size:19px}.kicker{font-size:8px}nav{padding:4px}nav button{padding:7px}.meta p{font-size:9px}footer{padding-top:5px;padding-bottom:5px}.fitting-controls{grid-template-columns:repeat(4,minmax(0,1fr))}input[type=range]{margin:1px 0}.file-input{padding:4px 7px}.control{padding:3px 7px}}
@@ -79,6 +90,12 @@ input[type=range]{width:100%;accent-color:#ffaf5b;margin:6px 0 0}
 <a class="cta" href="https://sketchfab.com/3d-models/free-honda-crf-450-c80f0e732e844580af412958c9d67315" target="_blank" rel="noopener">GET HONDA</a>
 </div>
 <div id="fitting">
+<div class="model-instructions">
+<div><strong>STEP 1 · Download Honda</strong><span>Free with a Sketchfab account. On the official model page tap <b>Download 3D Model</b>, choose <b>glTF</b>, then save the ZIP to Files.</span>
+<a href="https://sketchfab.com/3d-models/free-honda-crf-450-c80f0e732e844580af412958c9d67315" target="_blank" rel="noopener">OPEN HONDA DOWNLOAD</a></div>
+<div><strong>STEP 2 · Obtain rider</strong><span>The realistic rigged MX rider we selected is a paid model. Nothing has been bought. Please check its no-AI licence before using it in an AI-assisted project.</span>
+<a href="https://www.cgtrader.com/3d-models/character/man/motocross-rider-rigged" target="_blank" rel="noopener">REVIEW RIDER FILE</a></div>
+</div>
 <div class="file-bar">
 <label class="file-input"><span>🏍</span><span><strong>LOAD HONDA 3D</strong><small id="bike-name">Tap to choose a 3D model</small></span><input id="bikeFile" type="file" accept=".glb,.zip,model/gltf-binary,application/zip"></label>
 <label class="file-input"><span>🪖</span><span><strong>LOAD RIDER 3D</strong><small id="rider-name">Use an authorised rider file</small></span><input id="riderFile" type="file" accept=".glb,.zip,model/gltf-binary,application/zip"></label>
@@ -90,6 +107,7 @@ input[type=range]{width:100%;accent-color:#ffaf5b;margin:6px 0 0}
 <div class="control"><label for="forward">Fore / aft <output id="forwardVal">0.00</output></label><input id="forward" type="range" min="-.95" max=".95" step=".01" value="0"></div>
 <div class="control"><label for="turn">Rider turn <output id="turnVal">0°</output></label><input id="turn" type="range" min="-180" max="180" step="5" value="0"></div>
 </div>
+<div class="actions-fit"><button type="button" id="save-fit" disabled>SAVE FIT SETTINGS</button><button type="button" id="capture" disabled>SAVE PREVIEW PHOTO</button></div>
 <div id="fileStatus" role="status">This viewer reads .GLB or Sketchfab .ZIP downloads locally on your iPhone. Files stay on your device.</div>
 <div class="note">Important: fitting is for scale and placement. An FBX/GLB rider in T-pose still needs proper skeletal posing for hands on bars, bent knees and freestyle animations.</div>
 </div>
@@ -103,6 +121,43 @@ const el=id=>document.getElementById(id);
 let renderer,scene,camera,controls,rootBike,rootRider,currentTab='posed';
 let modelBike=null,modelRider=null,booted=false;
 const loader=new GLTFLoader();
+const fitControls=['sizing','seat','forward','turn'];
+function enableReview(){
+ const ready=!!(modelBike&&modelRider);
+ el('save-fit').disabled=!ready;
+ el('capture').disabled=!ready;
+}
+function downloadLocalFile(blob,name){
+ const url=URL.createObjectURL(blob);
+ const anchor=document.createElement('a');anchor.href=url;anchor.download=name;
+ document.body.appendChild(anchor);anchor.click();anchor.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),30000);
+}
+el('save-fit').onclick=()=>{
+ if(!(modelBike&&modelRider))return;
+ const values=Object.fromEntries(fitControls.map(key=>[key,Number(el(key).value)]));
+ const data={
+  tool:'FMX Rider Studio fit settings',version:1,
+  notes:'Real model files are NOT included; importing them is necessary to reproduce this fit.',
+  bike:el('bike-name').textContent,rider:el('rider-name').textContent,
+  settings:values,sourceLinks:[
+   'https://sketchfab.com/3d-models/free-honda-crf-450-c80f0e732e844580af412958c9d67315'
+  ]
+ };
+ downloadLocalFile(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'fmx-rider-fit.json');
+ report('Fit positions saved. Keep this JSON with the original licensed model files.');
+};
+el('capture').onclick=()=>{
+ if(!(modelBike&&modelRider)||!renderer)return;
+ try{
+  renderer.render(scene,camera);
+  renderer.domElement.toBlob(blob=>{
+   if(!blob){report('Unable to save preview on this browser.',true);return}
+   downloadLocalFile(blob,'fmx-honda-and-rider-preview.png');
+   report('Preview image saved. You can share this image for visual feedback.');
+  },'image/png');
+ }catch(error){report('Preview capture failed: '+String(error.message||error),true)}
+};
 function setTab(name){
  currentTab=name;
  document.querySelectorAll('[data-tab]').forEach(b=>{const yes=b.dataset.tab===name;b.classList.toggle('active',yes);b.setAttribute('aria-pressed',String(yes))});
@@ -235,7 +290,7 @@ async function takeFile(type,file){
   const root=type==='bike'?rootBike:rootRider;
   root.clear();root.add(obj);
   if(type==='bike')modelBike=obj;else modelRider=obj;
-  el('empty').style.display='none';updatePose();
+  el('empty').style.display='none';updatePose();enableReview();
   let bones=0;let skinned=0;
   obj.traverse(o=>{if(o.isBone)bones++;if(o.isSkinnedMesh)skinned++});
   let result=(modelBike&&modelRider?'Both actual 3D files loaded. Adjust the rider\'s fit. ':'Loaded the '+type+' model. ');
