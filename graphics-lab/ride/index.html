@@ -747,7 +747,9 @@ function draw(){
  cam.left=-m.W/(2*scale);cam.right=m.W/(2*scale);cam.top=m.H/(2*scale);cam.bottom=-m.H/(2*scale);
  cam.updateProjectionMatrix();
  // Track render's x axis goes right, whereas the fixed side camera sees -Z to its right.
- bikeGroup.position.set(0,(m.H*.5-m.bottomLine)/scale+state.y,(m.W*.5-m.W*.295)/scale);
+ // Include the difference between the physics position and the eased camera;
+ // otherwise the imported 3D bike would drift away from its wheel contact.
+ bikeGroup.position.set(0,(m.H*.5-m.bottomLine)/scale+state.y,(m.W*.5-m.W*.295)/scale-(state.x-T.st.x));
  bikeGroup.rotation.x=state.pitch;
  bikeRoot.scale.z=bikeFlip;
  renderer.render(scene,cam);
