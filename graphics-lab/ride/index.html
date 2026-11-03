@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#182b30">
+<title>FMX Side-On Ride Test — Real Model Loader</title>
+<style>
+:root{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f2f1e9;background:#17282b}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;height:100dvh;overflow:hidden;overscroll-behavior:none}
+button,input,a{-webkit-tap-highlight-color:transparent}
+#shell{display:flex;flex-direction:column;height:100%;height:100dvh;overflow:hidden}
+header{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#13282f;border-bottom:1px solid #f8f4e028;padding:max(10px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 9px max(14px,env(safe-area-inset-left))}
+.kicker{font-size:9px;letter-spacing:.18em;color:#f5b876;font-weight:900}
+h1{font-size:clamp(21px,3.8vw,29px);letter-spacing:-.045em;line-height:1.08;margin:3px 0 0;font-weight:950}
+h1 em{font-style:normal;color:#f1b46b}
+.chip{font-size:9px;font-weight:850;border-radius:10px;padding:8px 10px;background:#203f44;border:1px solid #9cc0ae44;color:#d9e5dd;white-space:nowrap;letter-spacing:.05em}
+#view{flex:1;min-height:0;position:relative;overflow:hidden;background:#aac7c6;touch-action:none}
+#art{width:100%;height:100%;display:block;touch-action:none}
+#feature{position:absolute;top:13px;left:max(14px,env(safe-area-inset-left));pointer-events:none;text-shadow:0 2px 12px #152a2b66}
+#feature strong{display:block;font-size:clamp(18px,3.2vw,25px);font-weight:950;letter-spacing:-.045em}
+#feature span{font-size:11px;color:#f5eee0;font-weight:650;display:block;max-width:250px;margin-top:3px;line-height:1.3}
+#readout{position:absolute;top:13px;right:max(13px,env(safe-area-inset-right));min-width:80px;border-radius:12px;background:#142b30bd;border:1px solid #f7f6ea33;padding:8px 10px;text-align:right;pointer-events:none}
+#readout b{display:block;font-size:17px;color:#f9c17e}
+#readout span{font-size:9px;color:#deebdf}
+#tape{position:absolute;left:0;right:0;bottom:0;height:23px;pointer-events:none;background:linear-gradient(0deg,#152c2ba9,transparent);color:#f0dec1;padding:6px 10px 2px;display:flex;justify-content:space-between;align-items:center;font-size:9px;letter-spacing:.06em}
+#tape div:first-child{font-weight:800}
+#loading{position:absolute;inset:0;background:#1c2c31;display:flex;align-items:center;justify-content:center;color:#e6d8c3;font-weight:800;font-size:13px;text-align:center;opacity:0;pointer-events:none}
+footer{background:#142a30;flex:none;border-top:1px solid #f5f1e31c;padding:9px max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.go{display:flex;gap:8px;align-items:center}
+button{font-weight:850;font-size:11px;border-radius:11px;padding:11px 12px;border:1px solid #e7eee245;color:#ecf5f0;background:#294248;white-space:nowrap;touch-action:manipulation}
+button.primary{background:#f4b56e;border-color:#ffd4a5;color:#17272a;min-width:89px}
+button:active{transform:scale(.98)}
+#progress{flex:1;min-width:60px;accent-color:#f6bd7e;touch-action:pan-x}
+.quick{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;align-items:center;padding-top:8px;overscroll-behavior-x:contain}
+.quick::-webkit-scrollbar{display:none}
+.quick button{font-weight:800;flex:none;font-size:10px;border-color:#9ab4aa44;background:#1c363b;padding:7px 12px}
+.quick button.selected{border-color:#f9bb74;color:#fac58b}
+.under{display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:9px;color:#aebfbc;gap:12px}
+.under a{color:#f0bc7c;text-decoration:none;white-space:nowrap}
+@media(max-width:580px){.chip{display:none}header{padding-top:max(8px,env(safe-area-inset-top));padding-bottom:7px}.go{gap:5px}button{padding:10px 8px;font-size:10px}button.primary{min-width:70px}#feature{top:10px}#feature span{font-size:10px}#readout{top:10px}.under{line-height:1.35}}
+@media(orientation:landscape) and (max-height:450px){header{padding:5px 12px}h1{font-size:19px}.kicker{font-size:8px}footer{padding:5px 12px}.go button{padding:7px 11px}.quick{padding-top:4px}.quick button{padding:5px 10px}.under{display:none}#feature strong{font-size:18px}#tape{height:16px;padding-top:1px}}
+</style></head>
+<body>
+<div id="shell">
+<header>
+<div><div class="kicker">FMX VISUAL STUDIO · SIDE-ON RIDE 0.1</div><h1>FMX <em>RIDE TEST</em></h1></div>
+<div class="chip">V3 JUMPS · PHONE CONTROLS</div>
+</header>
+<main id="view">
+<canvas id="art" aria-label="Side-on track with V3 jump shapes and curved FMX ramp"></canvas>
+<div id="three-layer" aria-label="Real imported 3D bike and rider overlay"></div>
+<div id="model-flag"><b id="modelStatus">PHYSICS TEST · NO REAL BIKE LOADED</b><span id="flightStatus">Use GAS to start; load a real Honda model to see the bike.</span></div>
+<div id="driving">
+ <button id="brake" class="drive-btn left" aria-label="Hold to brake">BRAKE</button>
+ <div class="lean">
+  <button id="leanBack" class="drive-btn" aria-label="Lean back">◀ LEAN</button>
+  <button id="leanFront" class="drive-btn" aria-label="Lean forward">LEAN ▶</button>
+ </div>
+ <button id="gas" class="drive-btn gas" aria-label="Hold for throttle">GAS</button>
+</div>
+<div id="feature"><strong id="feature-title">THE FREESTYLE LINE</strong><span id="feature-text">Doubled jump heights, steep takeoff crests and a curled steel kicker</span></div>
+<div id="readout"><b id="meters">000 m</b><span id="pace">CAMERA · 1×</span></div>
+<div id="tape"><div>DRAG TO EXPLORE · PINCH TO ZOOM</div><div id="stateLabel">TRACK PREVIEW</div></div>
+</main>
+<footer>
+<div class="go">
+<button class="primary" id="play" aria-pressed="false">▶ RIDE</button>
+<input type="range" id="progress" min="0" max="420" step=".1" value="0" aria-label="Move through the motocross course">
+<button id="speed" aria-label="Change camera speed">1× SPEED</button>
+<button id="models" class="asset-btn">LOAD 3D</button>
+<button id="reset">↺ RESET</button>
+</div>
+<div class="quick" aria-label="Jump to track features">
+<button data-seek="18" class="selected">01 · ROLLER</button>
+<button data-seek="63">02 · BIG TABLETOP</button>
+<button data-seek="148">03 · CURVED KICKER</button>
+<button data-seek="202">04 · HUGE LANDER</button>
+<button data-seek="299">05 · STEP DOWN</button>
+<button data-seek="363">06 · FINISHING JUMP</button>
+</div>
+<div class="under"><span>Physics preview + real-file loader. No fake bike or rider; approved V3 jumps unchanged.</span><div><a href="../jumps-v3/">Jump Lab V3</a> · <a href="../fit/">Rider studio</a></div></div>
+</footer>
+<div id="asset-modal" hidden>
+  <div class="asset-sheet">
+    <div class="sheet-head"><div><div class="kicker">REAL 3D ARTWORK ONLY</div><h2>Load the approved bike and rider</h2></div><button id="close-assets" aria-label="Close model loader">✕</button></div>
+    <p>This is the **actual 3D model loader**, not a graphics substitute. The Honda and motocross-rider models you've approved are still on their creators' websites, so they aren't automatically included here.</p>
+    <div class="asset-rows">
+      <div class="asset-row">
+        <div><b>HONDA CRF450</b><small>Free CC BY download from the original creator. Choose GLTF ZIP or GLB.</small>
+        <a href="https://sketchfab.com/3d-models/free-honda-crf-450-c80f0e732e844580af412958c9d67315" target="_blank" rel="noopener">Official Honda download</a></div>
+        <label class="load-btn">SELECT FILE<input id="bikeFile" type="file" accept=".glb,.zip,model/gltf-binary,application/zip"></label>
+      </div>
+      <div class="asset-row">
+        <div><b>RIGGED MX RIDER</b><small>Optional until properly licensed. We cannot rehost or copy the paid rider model.</small>
+        <a href="https://www.cgtrader.com/3d-models/character/man/motocross-rider-rigged" target="_blank" rel="noopener">Selected rider details</a></div>
+        <label class="load-btn">SELECT FILE<input id="riderFile" type="file" accept=".glb,.zip,model/gltf-binary,application/zip"></label>
+      </div>
+    </div>
+    <div class="asset-adjust">
+      <label>Bike facing <button id="flipBike">FLIP BIKE</button></label>
+      <label>Rider size <input id="riderSize" type="range" min=".65" max="1.3" step=".01" value="1"></label>
+      <label>Rider height <input id="riderY" type="range" min="-1.5" max="1.8" step=".05" value="0"></label>
+      <label>Rider fore/aft <input id="riderZ" type="range" min="-1.8" max="1.8" step=".05" value="0"></label>
+    </div>
+    <div class="file-status" id="fileStatus" role="status">No models loaded. You can test physics using the orange marker; real artwork appears when imported.</div>
+    <p class="footnote">Your selected files load locally in the browser; they are not uploaded. A T-pose character still needs skeletal posing and trick animations. Some models may need further orientation, geometry and mobile optimisation.</p>
+  </div>
+</div>
+</div>
+<style>
+#three-layer{position:absolute;inset:0;pointer-events:none;z-index:2}
+#three-layer canvas{width:100%;height:100%;display:block;pointer-events:none}
+#model-flag{position:absolute;top:48px;left:max(14px,env(safe-area-inset-left));z-index:3;pointer-events:none;text-shadow:0 2px 8px #172b29a8}
+#model-flag b{display:block;font-size:10px;letter-spacing:.04em;color:#ffe0ad;font-weight:900}
+#model-flag span{display:block;font-size:10px;color:#f9f9ed;margin-top:3px}
+#driving{position:absolute;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:25px;z-index:5;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;pointer-events:none}
+#driving .lean{display:flex;gap:7px}
+.drive-btn{pointer-events:auto;border:1px solid #ffffffe5;color:#f2f0dd;background:#203d3dba;border-radius:17px;padding:17px 15px;min-height:53px;font-size:12px;font-weight:950;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 5px 15px #0003}
+.drive-btn.gas{background:#edb46c;color:#1a2a2b;border-color:#ffe7ba;min-width:80px}
+.drive-btn.left{min-width:72px}
+.drive-btn.held{filter:brightness(1.25);transform:translateY(2px);border-color:#ffd18b}
+.asset-btn{background:#f2b971;border-color:#f2d19c;color:#24343a}
+#asset-modal[hidden]{display:none}
+#asset-modal{position:fixed;z-index:20;inset:0;background:#051114d9;display:flex;align-items:center;justify-content:center;padding:12px;backdrop-filter:blur(7px)}
+.asset-sheet{background:#1d3237;border:1px solid #c4d6c648;border-radius:19px;padding:17px;max-height:min(730px,94dvh);overflow:auto;max-width:580px;width:100%;box-shadow:0 18px 55px #0007;color:#eff2e8}
+.asset-sheet h2{font-size:18px;line-height:1.1;margin:2px 0 0}
+.asset-sheet p{font-size:12px;line-height:1.55;color:#c9d5d1;margin:11px 0}
+.sheet-head{display:flex;justify-content:space-between;gap:10px;align-items:start}
+.sheet-head button{padding:7px 12px;background:#3e5356;font-size:16px}
+.asset-rows{display:grid;gap:8px}
+.asset-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px;background:#243e42;border:1px solid #ffffff30;border-radius:12px}
+.asset-row b{display:block;font-size:12px;color:#f8d4a1}
+.asset-row small{display:block;font-size:11px;color:#dce6dd;line-height:1.45;margin-top:3px}
+.asset-row a{font-size:11px;display:inline-block;color:#f7bf7e;margin-top:7px}
+.load-btn{flex-shrink:0;position:relative;border-radius:10px;padding:10px 11px;background:#f3b974;font-size:10px;font-weight:900;color:#1c2d31;text-align:center;cursor:pointer}
+.load-btn input{position:absolute;width:1px;height:1px;opacity:0;left:0;top:0}
+.asset-adjust{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px}
+.asset-adjust label{font-size:10px;font-weight:800;color:#e3eee3;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.asset-adjust input{width:90px;accent-color:#f2b371}
+.asset-adjust button{padding:8px;font-size:9px}
+.file-status{margin-top:12px;padding:10px;border-radius:10px;font-size:11px;background:#32474a;color:#f7d4a9}
+.footnote{font-size:10px!important}
+@media(max-width:660px){#model-flag{top:54px}#driving .lean{gap:3px}.drive-btn{font-size:10px;padding:12px 10px;min-height:47px;border-radius:12px}#driving{bottom:20px}.asset-adjust{grid-template-columns:1fr}}
+@media(orientation:landscape) and (max-height:460px){#driving{bottom:17px}.drive-btn{padding:9px 15px;min-height:37px}#model-flag{top:37px}.asset-sheet{padding:12px;max-width:750px}}
+</style>
+<script>
+"use strict";
+const C=document.getElementById('art'),g=C.getContext('2d',{alpha:false,desynchronized:true}),$=x=>document.getElementById(x);
+const PI=Math.PI,TAU=PI*2,LENGTH=420;
+let W=0,H=0,DPR=1,drawingScale=14,bottomLine=0,lastRect="",cameraY=0;
+const st={x:5,velocity:0,play:false,speed:1,zoom:1,desiredX:5,lastTime:0,drag:false,pinch:0,theme:"outback"};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const smooth=(t)=>{t=clamp(t,0,1);return t*t*t*(10-15*t+6*t*t)};
+const hash=n=>{let v=Math.sin(n*127.1+78.233)*43758.5453123;return v-Math.floor(v)};
+// The base riding line is sculpted in metres. Every corresponding V2
+// feature is over twice as tall; lip-led faces stand distinctly steeper
+// than the smooth landing-side easing.
+const LIP=(t)=>{t=clamp(t,0,1);return t*t*(.74+.26*t)};
+// A takeoff lip has a distinct departure slope at its crest instead of the
+// rounded-to-horizontal smoothstep used on soft rollers and landings.
+const hump=(x,a,b,c,d,h,pronounced=false)=>{
+ if(x<=a||x>=d)return 0;
+ if(x<b)return h*(pronounced?LIP((x-a)/(b-a)):smooth((x-a)/(b-a)));
+ if(x<=c)return h;
+ return h*(1-smooth((x-c)/(d-c)));
+};
+const KICKER={start:132,end:160,height:11.2};
+function rampProfile(x){
+ const t=clamp((x-KICKER.start)/(KICKER.end-KICKER.start),0,1);
+ // Powered curve: stays convex all the way to the end.
+ // Final tangent ~1.20 rise/run (about 50 degrees), never levels off.
+ return KICKER.height*(.67*t*t+.33*t*t*t*t*t);
+}
+function height(x){
+ let n=0;
+ n+=hump(x,15,26,27,47,3.18);
+ n+=hump(x,58,77,90,117,7.50,true);
+ n+=hump(x,188,214,221,282,13.40);
+ n+=hump(x,291,309,316,346,6.10,true);
+ n+=hump(x,359,377,380,410,4.60,true);
+ if(x>117&&x<129)n+=.16*Math.sin(PI*(x-117)/12)**2;
+ return n;
+}
+function steelHeight(x){return x<KICKER.start||x>KICKER.end?0:rampProfile(x)}
+function size(){
+ const rc=C.getBoundingClientRect();
+ const r=[Math.round(rc.width),Math.round(rc.height),Math.min(devicePixelRatio||1,1.7)].join('/');
+ if(r===lastRect)return;
+ lastRect=r;W=rc.width;H=rc.height;DPR=Math.min(devicePixelRatio||1,1.7);
+ C.width=Math.max(1,Math.round(W*DPR));C.height=Math.max(1,Math.round(H*DPR));
+ g.setTransform(DPR,0,0,DPR,0,0);
+}
+function layout(){
+ // Smoothly widen the view for the huge FMX gap / landing instead of
+ // clipping the takeoff tip or hiding the lander on a phone screen.
+ const hero=smooth((st.x-102)/40)*(1-smooth((st.x-258)/35));
+ drawingScale=clamp(W/54,7.8,24)*st.zoom*(1-.25*hero);
+ bottomLine=H*.76+cameraY*drawingScale*.55;
+}
+function sx(x){return W*.295+(x-st.x)*drawingScale}
+function sy(y){return bottomLine-y*drawingScale}
+function gradient(y1,y2,stops){
+ const o=g.createLinearGradient(0,y1,0,y2);for(const [at,color] of stops)o.addColorStop(at,color);return o;
+}
+function canvasPath(fn,start,end,delta){
+ g.beginPath();let first=true;
+ for(let x=start;x<end;x+=delta){const [px,py]=fn(x);if(first){g.moveTo(px,py);first=false}else g.lineTo(px,py)}
+ const [ex,ey]=fn(end);g.lineTo(ex,ey);
+}
+function sky(){
+ g.fillStyle=gradient(0,H,[[0,"#6e9cb8"],[.3,"#9fbac0"],[.62,"#d2c6b2"],[1,"#ddac7f"]]);
+ g.fillRect(0,0,W,H);
+ const sunx=W*.73-st.x*drawingScale*.013,suny=H*.19;
+ const sunlight=g.createRadialGradient(sunx,suny,0,sunx,suny,H*.6);
+ sunlight.addColorStop(0,"#fff4d0bb");sunlight.addColorStop(.15,"#ffdfaa80");sunlight.addColorStop(.44,"#ffd3a538");sunlight.addColorStop(1,"#ffdeac00");
+ g.fillStyle=sunlight;g.fillRect(0,0,W,H);
+ g.fillStyle="#fff4d6";g.globalAlpha=.87;g.beginPath();g.arc(sunx,suny,Math.max(8,H*.033),0,TAU);g.fill();g.globalAlpha=1;
+ // Wispy distant cloud bands move much more slowly than the track.
+ const off=st.x*drawingScale*.045;
+ for(let i=0;i<8;i++){
+  const x=((i*211-off)%(W+340)+W+340)%(W+340)-170,y=H*(.15+.055*(i%4));
+  g.strokeStyle=i%2?"#f8ede343":"#d3e4df52";g.lineWidth=3+2*hash(i+3);g.lineCap="round";
+  g.beginPath();g.moveTo(x,y);g.bezierCurveTo(x+39,y-5,x+84,y+4,x+132,y);g.stroke();
+ }
+}
+function distantHills(){
+ const layers=[
+  {f:.09,top:.40,amp:43,cycle:.012,color:"#b6b3a5",mid:1.9},
+  {f:.16,top:.53,amp:35,cycle:.022,color:"#8ba09b",mid:2.5},
+  {f:.29,top:.64,amp:22,cycle:.039,color:"#657e77",mid:1.5}
+ ];
+ layers.forEach((l,i)=>{
+  const scroll=st.x*drawingScale*l.f;
+  g.fillStyle=l.color;g.beginPath();g.moveTo(-2,H);
+  for(let x=-2;x<=W+6;x+=4){
+   const t=(x+scroll)*l.cycle;
+   const wave=Math.sin(t+i*.9)*.62+Math.cos(t*.44+1.7)*.29+Math.sin(t*1.8+2.3)*.09;
+   g.lineTo(x,H*l.top+l.amp*wave);
+  }
+  g.lineTo(W+3,H);g.closePath();g.fill();
+  // Low contrast ridge lighting keeps background quieter than the track.
+  g.strokeStyle="#f4e4c61c";g.lineWidth=1.3;g.beginPath();
+  for(let x=-2;x<=W+6;x+=5){
+   const t=(x+scroll)*l.cycle;
+   const wave=Math.sin(t+i*.9)*.62+Math.cos(t*.44+1.7)*.29+Math.sin(t*1.8+2.3)*.09;
+   const y=H*l.top+l.amp*wave;
+   if(x===-2)g.moveTo(x,y);else g.lineTo(x,y);
+  }g.stroke();
+ });
+}
+function terrainRocks(){
+ // Distant weathered sandstone outcrops, naturally rounded, never block-like.
+ const drift=st.x*drawingScale*.39;
+ const gap=194;
+ for(let i=-2;i<16;i++){
+  const x=i*gap+hash(i+45)*40-drift;
+  if(x<-230||x>W+250)continue;
+  const y=H*.676+Math.sin(i)*11,scale=.74+hash(i+5)*.64;
+  g.fillStyle="#7b8579b3";g.beginPath();g.moveTo(x-75*scale,y);
+  g.bezierCurveTo(x-76*scale,y-16*scale,x-38*scale,y-17*scale,x-38*scale,y-56*scale);
+  g.bezierCurveTo(x-20*scale,y-76*scale,x+2*scale,y-72*scale,x+11*scale,y-49*scale);
+  g.bezierCurveTo(x+41*scale,y-62*scale,x+55*scale,y-44*scale,x+46*scale,y-18*scale);
+  g.quadraticCurveTo(x+86*scale,y-6*scale,x+90*scale,y);
+  g.closePath();g.fill();
+  g.strokeStyle="#d0c5a94d";g.lineWidth=2;
+  g.beginPath();g.moveTo(x-37*scale,y-52*scale);g.quadraticCurveTo(x-20*scale,y-65*scale,x-9*scale,y-61*scale);g.stroke();
+ }
+}
+function bush(x,y,unit,opacity){
+ g.globalAlpha=opacity;g.save();g.translate(x,y);g.scale(unit,unit);
+ g.strokeStyle="#445d50";g.lineWidth=1.6;g.lineCap="round";
+ for(let i=-3;i<=3;i++){
+  const ang=i*.23,dy=21-Math.abs(i)*2;
+  g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(i*4,-dy*.6,i*7,-dy);g.stroke();
+  g.fillStyle=i%2?"#647e5e":"#7b8d65";
+  g.beginPath();g.ellipse(i*7,-dy,8,3,-ang,0,TAU);g.fill();
+ }
+ g.restore();g.globalAlpha=1;
+}
+function forest(){
+ // Highly transparent gum trees create depth without clutter.
+ const par=.44, drift=st.x*drawingScale*par;
+ for(let i=-2;i<34;i++){
+  const seed=i+200,z=i*117+hash(seed)*81-drift;
+  if(z<-100||z>W+100)continue;
+  const base=H*.70+hash(seed*2)*20;
+  const sc=.5+hash(seed+13)*.8;
+  g.save();g.translate(z,base);g.scale(sc,sc);
+  g.globalAlpha=.14+hash(seed+40)*.1;
+  g.strokeStyle="#233f3b";g.lineCap="round";g.lineWidth=4;
+  g.beginPath();g.moveTo(0,0);g.bezierCurveTo(8,-33,-11,-66,2,-111);g.stroke();
+  for(let j=0;j<8;j++){
+   const ang=j*PI*.39,tx=Math.cos(ang)*21,ty=-91+Math.sin(ang)*19;
+   g.fillStyle=j%2?"#3e6457":"#476959";g.beginPath();
+   g.ellipse(tx,ty,25,9,ang*.24,0,TAU);g.fill();
+  }
+  g.restore();
+ }
+ g.globalAlpha=1;
+ // Distant trackside low scrub.
+ const step=21;
+ let a=Math.floor((st.x-50)*1/step)*step;
+ for(let p=a;p<st.x+W/drawingScale+35;p+=step){
+  const x=sx(p),y=sy(height(p))-(13+hash(p)*11);
+  if(y<0||y>H||x<-40||x>W+40)continue;
+  bush(x,y,.65+hash(p+2)*.25,.19);
+ }
+}
+function landscape(){
+ sky();distantHills();terrainRocks();forest();
+}
+function sideFace(){
+ const a=Math.max(-30,st.x-45),b=Math.min(LENGTH+24,st.x+W/drawingScale+65);
+ const sideOffset=17;
+ // Deep undercut volume: continuous earthen shoulder with mottled shading.
+ g.beginPath();g.moveTo(sx(a)-6,H+20);g.lineTo(sx(a)-6,sy(height(a))+sideOffset);
+ for(let z=a;z<=b;z+=.25)g.lineTo(sx(z)-6,sy(height(z))+sideOffset);
+ g.lineTo(sx(b)-6,H+20);g.closePath();
+ g.fillStyle=gradient(bottomLine-155,H,[[0,"#a5744e"],[.26,"#87583b"],[.78,"#684432"],[1,"#402e27"]]);g.fill();
+ g.save();g.clip();
+ // Oblique layered geology following the terrain continuously.
+ const cuts=[7,16,29,44,64,85,110,148,192];
+ cuts.forEach((down,i)=>{
+  const aa=Math.max(-30,st.x-48),bb=Math.min(LENGTH+22,st.x+W/drawingScale+65);
+  canvasPath(z=>[sx(z)-6,sy(height(z))+17+down+Math.sin(z*.2+i*.8)*(2+i*.23)],aa,bb,.35);
+  g.lineWidth=i%2?2:4;
+  g.strokeStyle=i%3===0?"#ebae7722":"#1d201d25";g.stroke();
+ });
+ // A repeatable micro-texture (never random per frame, no shimmering).
+ const start=Math.floor(a*6),stop=Math.ceil(b*6);
+ for(let id=start;id<stop;id++){
+  let world=id/6;
+  let xx=sx(world)-4+hash(id+1)*4;
+  let dd=23+hash(id*4)*Math.min(H*.45,160);
+  let yy=sy(height(world))+dd;
+  if(yy<-5||yy>H+5)continue;
+  let rr=.5+hash(id*6+9)*2;
+  g.fillStyle=hash(id*7)>.53?"#f0c29237":"#30272139";
+  g.fillRect(xx,yy,rr*2.1,rr*.6);
+ }
+ g.restore();
+}
+function trackSurface(){
+ const a=Math.max(-30,st.x-46),b=Math.min(LENGTH+24,st.x+W/drawingScale+64);
+ const back=(z)=>[sx(z)+11,sy(height(z))-18];
+ const front=(z)=>[sx(z)-6,sy(height(z))+18];
+ // Soft surface shadow near the outer edge of the riding line.
+ g.lineJoin="round";g.lineCap="round";
+ canvasPath(z=>back(z),a,b,.20);
+ for(let z=b;z>=a;z-=.20){let [x,y]=front(z);g.lineTo(x,y)}
+ g.closePath();
+ g.fillStyle=gradient(bottomLine-30,bottomLine+55,[[0,"#e9b580"],[.32,"#d39c66"],[.7,"#ae784d"],[1,"#95633f"]]);
+ g.fill();
+ g.save();g.clip();
+ // Per-segment slope-aware shading gives a dimensional, earth-banked ribbon.
+ for(let z=a;z<b;z+=.62){
+  const z2=Math.min(b,z+.64),h1=height(z),h2=height(z2),slope=(h2-h1)/(z2-z);
+  g.fillStyle=slope>.03?"#fff3c411":slope<-.06?"#59433410":"#f6d6a10c";
+  const [bx,by]=back(z),[b2x,b2y]=back(z2),[fx,fy]=front(z),[f2x,f2y]=front(z2);
+  g.beginPath();g.moveTo(bx,by);g.lineTo(b2x,b2y);g.lineTo(f2x,f2y);g.lineTo(fx,fy);g.closePath();g.fill();
+ }
+ // Grain lines across track: longitudinal grooves that bend with dirt profile.
+ for(let lane=0;lane<10;lane++){
+  const offset=-13+lane*3.1;
+  canvasPath(z=>[
+   sx(z)+4.1-(lane/9)*6,
+   sy(height(z))+offset+Math.sin(z*.36+lane*.42)*(.45+lane*.03)
+  ],a,b,.28);
+  g.lineWidth=lane%3===0?2.2:.85;
+  g.strokeStyle=lane%3===0?"#78513954":"#ffe0af55";
+  g.stroke();
+ }
+ // Grit micro stones on the compacted ground.
+ const first=Math.floor(a*4),last=Math.ceil(b*4);
+ for(let i=first;i<last;i++){
+  const world=i/4,tx=hash(i*14+12),ty=hash(i*4+1);
+  const xx=sx(world)+10-16*tx;
+  const yy=sy(height(world))-17+31*ty;
+  const len=.6+hash(i+4)*2;
+  g.fillStyle=hash(i+87)>.48?"#ffe5bb77":"#614b376c";
+  g.beginPath();g.ellipse(xx,yy,len,len*.40,hash(i+9),0,TAU);g.fill();
+ }
+ g.restore();
+ // The rim is a long, coherent clean shape, not boxes or jagged polygons.
+ canvasPath(z=>back(z),a,b,.22);
+ g.strokeStyle="#ffe6b6b9";g.lineWidth=3.5;g.stroke();
+ canvasPath(z=>front(z),a,b,.22);
+ g.strokeStyle="#5e3f30a0";g.lineWidth=4;g.stroke();
+ canvasPath(z=>[sx(z)-5,sy(height(z))+14],a,b,.22);
+ g.strokeStyle="#dfaa7158";g.lineWidth=2.1;g.stroke();
+ // The lip of the front bank casts a shadow against the deeper dirt.
+ canvasPath(z=>[sx(z)-7,sy(height(z))+21],a,b,.22);
+ g.strokeStyle="#342d2666";g.lineWidth=9;g.stroke();
+}
+function kicker(){
+ const a=KICKER.start,b=KICKER.end;
+ if(sx(b)<-75||sx(a)>W+75)return;
+ const x=sx,y=sy;
+ const top=z=>y(rampProfile(z))-11;
+ const bottom=z=>top(z)+9;
+ g.save();g.lineCap="round";g.lineJoin="round";
+ // Realistic series of trussed triangular support sections, transparent between struts.
+ const legs=[];
+ for(let z=a+2;z<=b+.001;z+=2.8)legs.push(z);
+ g.strokeStyle="#263a40";g.lineWidth=3;
+ for(let i=0;i<legs.length;i++){
+  const z=legs[i],bx=x(z)-3,ground=y(height(z))-2,head=bottom(z);
+  g.beginPath();g.moveTo(bx,head);g.lineTo(bx,ground);g.stroke();
+  if(i>0){const p=legs[i-1];g.beginPath();g.moveTo(x(p)-3,bottom(p));g.lineTo(bx,ground);g.moveTo(x(p)-3,y(height(p)));g.lineTo(bx,head);g.stroke();}
+ }
+ g.lineWidth=2;g.strokeStyle="#7c9497";
+ for(let i=0;i<legs.length-1;i++){
+  const z=legs[i],z2=legs[i+1];
+  g.beginPath();g.moveTo(x(z)-3,(bottom(z)+y(height(z)))/2);g.lineTo(x(z2)-3,(bottom(z2)+y(height(z2)))/2);g.stroke();
+ }
+ // Gently bowed structural stringer and highly visible riding-deck profile.
+ g.beginPath();g.moveTo(x(a),top(a));for(let z=a+.1;z<b;z+=.14)g.lineTo(x(z),top(z));
+ g.lineTo(x(b),top(b));for(let z=b;z>a;z-=.14)g.lineTo(x(z)-2,bottom(z));
+ g.lineTo(x(a),bottom(a));g.closePath();
+ g.fillStyle=gradient(y(KICKER.height)-20,y(0)+14,[[0,"#bdc7b9"],[.34,"#7e9696"],[.7,"#455e65"],[1,"#2f454c"]]);g.fill();
+ g.strokeStyle="#25363b";g.lineWidth=2.8;g.stroke();
+ canvasPath(z=>[x(z),top(z)],a,b,.14);
+ g.strokeStyle="#f4efe0";g.lineWidth=4.2;g.stroke();
+ canvasPath(z=>[x(z),top(z)+3],a,b,.15);
+ g.strokeStyle="#f0b574";g.lineWidth=1.5;g.stroke();
+ // Repeating perforated steel deck ribs.
+ g.strokeStyle="#354d50bb";g.lineWidth=1;
+ for(let z=a+.55;z<b;z+=.63){
+  const xx=x(z),yy=top(z);
+  g.beginPath();g.moveTo(xx,yy+.9);g.lineTo(xx-2.5,yy+6.3);g.stroke();
+ }
+ // Rib and front plate at crest, visibly thicker than the deck surface.
+ g.beginPath();g.moveTo(x(b)-1,top(b));g.lineTo(x(b)-3,top(b)+10);
+ g.strokeStyle="#f8eac5";g.lineWidth=3.3;g.stroke();
+ g.restore();
+}
+function dustAndGrass(){
+ const start=Math.floor((st.x-26)/3)*3;
+ // Sparse low plants growing on the dirt shoulders, not blocking racing line.
+ for(let z=start;z<st.x+W/drawingScale+40;z+=3){
+  if(hash(z*3+2)>.28)continue;
+  if(z>130&&z<162)continue;
+  const x=sx(z),y=sy(height(z))-9;
+  if(x<0||x>W||y<-12||y>H)continue;
+  const sz=2.2+hash(z+39)*4;
+  g.strokeStyle=hash(z+81)>.6?"#657451aa":"#99855d8c";
+  g.lineWidth=1;g.beginPath();g.moveTo(x,y);
+  g.quadraticCurveTo(x-2,y-sz,x-5,y-sz*1.1);
+  g.moveTo(x,y);g.quadraticCurveTo(x+1,y-sz*1.6,x+4,y-sz*.98);g.stroke();
+ }
+ // Foreground pebbles create a subtly cinematic depth cue.
+ for(let z=start-30;z<st.x+W/drawingScale+55;z+=.95){
+  const x=sx(z)+hash(z+4)*9,depth=27+hash(z*17+8)*Math.min(100,H*.23);
+  const y=sy(height(z))+depth;
+  if(y<0||y>H||x<0||x>W||hash(z+37)>.39)continue;
+  const rr=.7+hash(z+5)*2.2;
+  g.fillStyle=hash(z+54)>.5?"#b78e646c":"#4b372f68";
+  g.beginPath();g.ellipse(x,y,rr*1.9,rr*.74,0,0,TAU);g.fill();
+ }
+}
+function signAt(z,label,color="#e6aa68"){
+ const x=sx(z),y=sy(height(z)),top=y-51;
+ if(x<-42||x>W+40)return;
+ g.strokeStyle="#3e5550";g.lineWidth=2.7;g.beginPath();g.moveTo(x,top);g.lineTo(x,y);g.stroke();
+ g.fillStyle=color;g.beginPath();g.moveTo(x,top);
+ g.quadraticCurveTo(x+17,top-4,x+29,top+1);g.lineTo(x+27,top+19);
+ g.quadraticCurveTo(x+16,top+15,x,top+17);g.closePath();g.fill();
+ g.fillStyle="#2a3534";g.font="900 9px system-ui";g.fillText(label,x+4,top+12);
+}
+function courseDetails(){
+ signAt(8,"START");signAt(124,"FMX");signAt(414,"FINISH","#c9e7d1");
+ // A faint white measuring stripe at ground level every 25 m.
+ g.font="800 9px system-ui";g.textBaseline="middle";
+ for(let z=25;z<LENGTH;z+=25){
+  if(z>130&&z<162)continue;
+  const x=sx(z),y=sy(height(z));
+  if(x<0||x>W)continue;
+  g.strokeStyle="#e6c89c65";g.lineWidth=2;
+  g.beginPath();g.moveTo(x-2,y-10);g.lineTo(x-5,y-24);g.stroke();
+  g.fillStyle="#f8dbb5aa";g.fillText(z+"m",x-2,y-29);
+ }
+}
+function atmosphere(){
+ let vignette=g.createRadialGradient(W*.48,H*.5,H*.24,W*.48,H*.52,Math.max(W,H)*.79);
+ vignette.addColorStop(0,"#00000000");vignette.addColorStop(.75,"#16251f00");vignette.addColorStop(1,"#0a201a55");
+ g.fillStyle=vignette;g.fillRect(0,0,W,H);
+ const glow=gradient(H*.35,H,[[0,"#ffcf8c00"],[.5,"#ffe4be07"],[1,"#241b140b"]]);g.fillStyle=glow;g.fillRect(0,0,W,H);
+}
+const featureList=[
+ {at:0,title:"BIG LIPS · V3",sub:"420 m track · 2× larger jump faces · pronounced crests"},
+ {at:15,title:"01 · WARM-UP ROLLER",sub:"Smallest feature · 3.2 m soft lip"},
+ {at:58,title:"02 · BIG TABLETOP",sub:"7.5 m tall · steep race-style takeoff lip"},
+ {at:129,title:"03 · STEEL FMX KICKER",sub:"11.2 m tall · deck CURLS UP toward launch"},
+ {at:187,title:"04 · HUGE DIRT LANDER",sub:"13.4 m tall · generous receiving face and run-out"},
+ {at:291,title:"05 · STEP-DOWN",sub:"6.1 m tall · pronounced takeoff crest"},
+ {at:358,title:"06 · FINISHING JUMP",sub:"4.6 m tall · quick takeoff and long landing"},
+ {at:412,title:"END OF THE LINE",sub:"Expanded jumps and the curved ramp-lip review"}
+];
+function activeFeature(){
+ let result=featureList[0];for(let a of featureList)if(st.x>=a.at)result=a;return result;
+}
+function render(){
+ size();if(!W||!H)return;
+ layout();g.setTransform(DPR,0,0,DPR,0,0);
+ landscape();sideFace();trackSurface();kicker();dustAndGrass();courseDetails();atmosphere();
+ // A clearly labelled guide marker is used only when no genuine 3D bike
+ // is available. It is a physics debug marker, NOT fake motorcycle art.
+ if(window.FMX_RIDE&&!window.FMX_RIDE.hasBike){
+   const p=window.FMX_RIDE.state,dy=p.y-(height(p.x));
+   const xx=sx(p.x),yy=sy(p.y);
+   g.save();g.globalAlpha=.76;
+   g.strokeStyle="#ffd498";g.lineWidth=2.8;g.beginPath();g.arc(xx,yy,9,0,TAU);g.stroke();
+   g.fillStyle="#ffc37c";g.beginPath();g.arc(xx,yy,3,0,TAU);g.fill();
+   g.strokeStyle="#f7d7ae";g.lineWidth=1.2;g.beginPath();g.moveTo(xx-19,yy);g.lineTo(xx-12,yy);g.moveTo(xx+12,yy);g.lineTo(xx+19,yy);g.stroke();
+   g.font="900 9px system-ui";g.fillStyle="#ffead4";g.textAlign="center";
+   g.fillText("PHYSICS MARKER",xx,yy-20);
+   if(dy>.3){g.globalAlpha=.15;g.fillStyle="#1e342e";g.beginPath();g.ellipse(xx,sy(height(p.x)),14,4,0,0,TAU);g.fill();}
+   g.restore();
+ }
+ const f=activeFeature();
+ $("feature-title").textContent=f.title;$("feature-text").textContent=f.sub;
+ $("meters").textContent=String(Math.round(st.x)).padStart(3,"0")+" m";
+ $("progress").value=String(clamp(st.x,0,LENGTH));
+ document.querySelectorAll('[data-seek]').forEach(b=>b.classList.toggle("selected",Number(b.dataset.seek)<=st.x+8&&Number(b.dataset.seek)>=st.x-21));
+ $("stateLabel").textContent=st.play?"SIDE-SCROLLING":"TRACK ART ONLY";
+}
+function setPlay(on){
+ st.play=on;
+ $("play").textContent=on?"Ⅱ PAUSE":"▶ PLAY";
+ $("play").setAttribute("aria-pressed",String(on));
+}
+function updateCamera(dt,snap){
+ if(st.play){
+  st.desiredX=clamp(st.desiredX+dt*15.5*st.speed,0,LENGTH);
+  if(st.desiredX>=LENGTH){st.desiredX=LENGTH;setPlay(false)}
+ }
+ // Follow easing is gentler than the sharp movement of the old demo.
+ const catchup=snap?1:1-Math.exp(-dt*5.9);
+ st.x=lerp(st.x,st.desiredX,catchup);
+ const lookahead=st.x+30;
+ const targetHeight=Math.max(
+  height(st.x+8)*.52,
+  height(lookahead)*.44,
+  steelHeight(st.x+9)*.57,
+  steelHeight(lookahead)*.37
+ );
+ const smoothing=snap?1:1-Math.exp(-dt*1.85);
+ cameraY=lerp(cameraY,targetHeight,smoothing);
+}
+$("play").onclick=()=>{
+ if(window.FMX_RIDE){window.FMX_RIDE.toggleAutoplay();return;}
+ if(st.desiredX>=LENGTH-1){st.desiredX=0;st.x=0}
+ setPlay(!st.play);
+};
+$("speed").onclick=()=>{
+ const options=[.5,1,1.5,2];st.speed=options[(options.indexOf(st.speed)+1)%options.length];
+ $("speed").textContent=st.speed+"× SPEED";$("pace").textContent="CAMERA · "+st.speed+"×";
+};
+$("reset").onclick=()=>{
+ setPlay(false);st.x=st.desiredX=5;cameraY=0;
+ if(window.FMX_RIDE)window.FMX_RIDE.reset();
+ render();
+};
+$("progress").addEventListener("input",e=>{
+ setPlay(false);st.x=st.desiredX=Number(e.target.value);
+ if(window.FMX_RIDE)window.FMX_RIDE.placeAt(st.x);
+ updateCamera(0,true);render();
+});
+document.querySelectorAll("[data-seek]").forEach(b=>b.onclick=()=>{
+ setPlay(false);st.desiredX=clamp(Number(b.dataset.seek),0,LENGTH);
+ st.x=st.desiredX;if(window.FMX_RIDE)window.FMX_RIDE.placeAt(st.x);
+ updateCamera(0,true);render();
+});
+let touches=new Map();
+C.addEventListener("pointerdown",e=>{
+ e.preventDefault();C.setPointerCapture(e.pointerId);touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ st.drag=true;st.pinch=0;setPlay(false);
+});
+C.addEventListener("pointermove",e=>{
+ if(!touches.has(e.pointerId))return;
+ const prev=touches.get(e.pointerId);
+ touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(touches.size===1)st.x=st.desiredX=clamp(st.desiredX-(e.clientX-prev.x)/Math.max(1,drawingScale),0,LENGTH);
+ if(touches.size===2){
+  const arr=[...touches.values()],dist=Math.hypot(arr[0].x-arr[1].x,arr[0].y-arr[1].y);
+  if(st.pinch>0)st.zoom=clamp(st.zoom*dist/st.pinch,.72,1.58);
+  st.pinch=dist;
+ }
+ updateCamera(0,true);render();
+});
+function pointerUp(e){touches.delete(e.pointerId);st.pinch=0;if(!touches.size)st.drag=false}
+C.addEventListener("pointerup",pointerUp);C.addEventListener("pointercancel",pointerUp);
+window.addEventListener("resize",()=>{lastRect="";render()});
+document.addEventListener("visibilitychange",()=>{if(document.hidden)setPlay(false)});
+function tick(now){
+ if(!st.lastTime)st.lastTime=now;
+ let dt=clamp((now-st.lastTime)/1000,0,.05);st.lastTime=now;
+ if(window.FMX_RIDE){
+   window.FMX_RIDE.update(dt);
+   st.desiredX=clamp(window.FMX_RIDE.state.x,0,LENGTH);
+ }
+ if(!st.drag)updateCamera(dt,false);
+ render();
+ if(window.FMX_RIDE)window.FMX_RIDE.draw();
+ requestAnimationFrame(tick);
+}
+window.FMX_TRACK={height,steelHeight,rampProfile,st,clamp,LENGTH,getMetrics:()=>({W,H,drawingScale,bottomLine,cameraY}),setPlay};
+requestAnimationFrame(tick);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
+import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
+const el=x=>document.getElementById(x);
+const T=window.FMX_TRACK;
+const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+const draco=new DRACOLoader();
+draco.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+loader.setDRACOLoader(draco);
+const state={x:5,y:0,speed:0,vy:0,pitch:0,omega:0,air:false,airTime:0,crashed:false,auto:false,gas:false,brake:false,back:false,forward:false};
+const bikeGroup=new THREE.Group(),riderGroup=new THREE.Group();
+const bikeRoot=new THREE.Group(),riderRoot=new THREE.Group();
+let bike=null,rider=null,renderer=null,scene=null,cam=null,lastSceneWidth=0,lastSceneHeight=0,bikeFlip=1;
+const WB=2.7,gravity=26,MAX_SPEED=27;
+// These are game-prototype coordinates, not calibrated real metres.
+const surface=x=>Math.max(T.height(x),T.steelHeight(x));
+const groundAt=x=>(surface(x-WB*.5)+surface(x+WB*.5))/2;
+function groundPitch(x){
+ return Math.atan2(surface(x+WB*.5)-surface(x-WB*.5),WB);
+}
+function setInfo(msg){el('fileStatus').textContent=msg;}
+function updateStatus(){
+ el('modelStatus').textContent=bike?(rider?'HONDA + RIDER · REAL 3D ASSETS':'REAL 3D BIKE · RIDER NOT LOADED'):'PHYSICS TEST · NO REAL BIKE LOADED';
+ el('flightStatus').textContent=state.crashed?'CRASHED · TAP RESET':state.air?'AIRBORNE · LEAN TO CONTROL PITCH':'Hold GAS · use LEAN in the air · BRAKE to slow';
+}
+function placeAt(x){
+ state.x=T.clamp(x,5,T.LENGTH-2);
+ state.y=groundAt(state.x);
+ state.speed=0;state.vy=0;state.pitch=groundPitch(state.x);
+ state.omega=0;state.air=false;state.airTime=0;state.crashed=false;state.auto=false;updateStatus();
+}
+function reset(){placeAt(5)}
+function toggleAutoplay(){
+ if(state.crashed||state.x>T.LENGTH-4)placeAt(5);
+ state.auto=!state.auto;
+ el('play').textContent=state.auto?'Ⅱ AUTO RIDE':'▶ AUTO RIDE';
+}
+function launch(vy,pitch){
+ state.air=true;state.airTime=0;state.vy=vy;
+ state.pitch=Math.max(state.pitch,pitch);
+ state.omega=.05;
+}
+function step(dt){
+ if(state.crashed){state.speed=Math.max(0,state.speed-dt*12);return}
+ const go=state.gas||state.auto,slow=state.brake;
+ const slope=T.clamp(groundPitch(state.x),-.95,.95);
+ const accel=go?12:0;
+ state.speed=T.clamp(state.speed+(accel-(slow?21:0)-(.66+state.speed*.022)-(!state.air?Math.sin(slope)*8:0))*dt,0,MAX_SPEED);
+ const oldx=state.x;
+ state.x=T.clamp(state.x+state.speed*dt,4,T.LENGTH-2);
+ if(state.x>=T.LENGTH-2){state.auto=false;}
+ if(!state.air){
+  const y=groundAt(state.x),newPitch=groundPitch(state.x);
+  state.y=y;
+  state.pitch+=(newPitch-state.pitch)*Math.min(1,dt*15);
+  state.omega=0;
+  // Dirt lip: a smooth rolling face becomes an abrupt edge, launching
+  // the bike at a visible upward trajectory when travel speed is enough.
+  for(const crest of [77,309,377]){
+   if(oldx<crest&&state.x>=crest&&state.speed>10){
+    launch(state.speed*.50+1.5,Math.max(.2,Math.atan(1.2)));
+    break;
+   }
+  }
+  // Steel kicker has a real up-curved terminal launch tangent.
+  if(oldx<160&&state.x>=160&&state.speed>8){
+   const slopeAtTip=(T.rampProfile(160)-T.rampProfile(159.7))/.3;
+   launch(state.speed*Math.max(.52,Math.min(slopeAtTip,.95)),Math.atan(slopeAtTip));
+  }
+  // A downhill crest can release contact naturally at racing speed.
+  if(!state.air&&state.speed>15&&oldx<117&&state.x>=117)launch(state.speed*.32,.25);
+ }else{
+  state.airTime+=dt;
+  const lean=(state.back?1:0)-(state.forward?1:0);
+  state.omega=T.clamp(state.omega+lean*5.3*dt-state.omega*.33*dt,-8,8);
+  state.pitch+=state.omega*dt;
+  state.vy-=gravity*dt;state.y+=state.vy*dt;
+  const land=groundAt(state.x);
+  if(state.airTime>.1&&state.y<=land&&state.vy<0){
+   if(Math.abs(Math.atan2(Math.sin(state.pitch-groundPitch(state.x)),Math.cos(state.pitch-groundPitch(state.x))))>1.05){
+    state.crashed=true;state.auto=false;state.gas=false;setInfo('Crash: reset and aim for a straighter landing.');
+   }else{
+    state.air=false;state.y=land;state.vy=0;state.pitch=groundPitch(state.x);state.omega=0;
+   }
+  }
+  if(state.y< -8){state.crashed=true;state.auto=false}
+ }
+}
+function update(dt){
+ let steps=Math.max(1,Math.ceil(dt/(1/100)));
+ for(let i=0;i<steps;i++)step(dt/steps);
+ updateStatus();
+}
+function setupScene(){
+ const host=el('three-layer');
+ scene=new THREE.Scene();
+ cam=new THREE.OrthographicCamera(-5,5,5,-5,.1,100);
+ cam.position.set(30,0,0);cam.up.set(0,1,0);cam.lookAt(0,0,0);
+ renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'high-performance',preserveDrawingBuffer:false});
+ renderer.setPixelRatio(Math.min(1.45,devicePixelRatio||1));
+ renderer.setClearColor(0,0);
+ renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+ renderer.domElement.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none';
+ host.appendChild(renderer.domElement);
+ scene.add(new THREE.HemisphereLight(0xe7f3fa,0x6f6654,2.3));
+ const key=new THREE.DirectionalLight(0xffe3bf,2.9);key.position.set(6,12,9);scene.add(key);
+ const fill=new THREE.DirectionalLight(0xadd9fa,1.5);fill.position.set(-8,2,-5);scene.add(fill);
+ scene.add(bikeGroup);bikeGroup.add(bikeRoot);bikeRoot.add(riderGroup);
+ riderGroup.add(riderRoot);
+}
+function draw(){
+ if(!renderer)return;
+ const m=T.getMetrics();
+ if(!m.W||!m.H)return;
+ const scale=m.drawingScale;
+ const targetWidth=Math.max(1,Math.round(m.W)),targetHeight=Math.max(1,Math.round(m.H));
+ if(targetWidth!==lastSceneWidth||targetHeight!==lastSceneHeight){
+  renderer.setSize(targetWidth,targetHeight,false);
+  lastSceneWidth=targetWidth;lastSceneHeight=targetHeight;
+ }
+ cam.left=-m.W/(2*scale);cam.right=m.W/(2*scale);cam.top=m.H/(2*scale);cam.bottom=-m.H/(2*scale);
+ cam.updateProjectionMatrix();
+ // Track render's x axis goes right, whereas the fixed side camera sees -Z to its right.
+ bikeGroup.position.set(0,(m.H*.5-m.bottomLine)/scale+state.y,(m.W*.5-m.W*.295)/scale);
+ bikeGroup.rotation.x=state.pitch;
+ bikeRoot.scale.z=bikeFlip;
+ renderer.render(scene,cam);
+}
+function orientBike(model){
+ // Make the shortest bound X (bike width), medium Y, longest Z (wheelbase).
+ // A facing flip control is exposed because source models vary in direction.
+ model.updateMatrixWorld(true);
+ const box=new THREE.Box3().setFromObject(model),sz=box.getSize(new THREE.Vector3());
+ const dims=[sz.x,sz.y,sz.z],ord=[0,1,2].sort((a,b)=>dims[a]-dims[b]);
+ const axes=[new THREE.Vector3(),new THREE.Vector3(),new THREE.Vector3()];
+ axes[ord[0]].set(1,0,0);axes[ord[1]].set(0,1,0);axes[ord[2]].set(0,0,1);
+ const mat=new THREE.Matrix4().makeBasis(...axes);
+ if(mat.determinant()<0){axes[ord[0]].multiplyScalar(-1);mat.makeBasis(...axes);}
+ model.applyMatrix4(mat);model.updateMatrixWorld(true);
+}
+function normalize(model,type){
+ model.updateMatrixWorld(true);
+ if(type==='bike')orientBike(model);
+ let box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3());
+ if(!Number.isFinite(size.y)||size.y<.02)throw Error('Unusable 3D model dimensions.');
+ const wanted=type==='bike'?4.1:3.0;
+ const norm=type==='bike'?wanted/Math.max(.01,size.z):wanted/size.y;
+ model.scale.multiplyScalar(norm);
+ model.updateMatrixWorld(true);box=new THREE.Box3().setFromObject(model);
+ const cent=box.getCenter(new THREE.Vector3());
+ model.position.sub(new THREE.Vector3(cent.x,box.min.y,cent.z));
+ model.updateMatrixWorld(true);
+ model.traverse(o=>{if(o.isMesh){o.frustumCulled=true}});
+ return model;
+}
+function setRiderFit(){
+ riderGroup.scale.setScalar(Number(el('riderSize').value));
+ riderGroup.position.set(0,Number(el('riderY').value),Number(el('riderZ').value));
+}
+function report(message){setInfo(message);updateStatus()}
+// Read a locally selected self-contained GLB or Sketchfab-exported glTF ZIP.
+// File contents are never transferred to the server, and source attribution
+// still needs to be retained before publishing a game.
+async function parseLocalModel(file){
+ if(/\.glb$/i.test(file.name)){
+  const url=URL.createObjectURL(file);
+  try{return await loader.loadAsync(url)}finally{URL.revokeObjectURL(url)}
+ }
+ if(!/\.zip$/i.test(file.name))throw Error('Choose a GLB or a model ZIP downloaded from Sketchfab.');
+ if(file.size>130*1024*1024)throw Error('This archive is too large for the iPhone viewer. Optimise it first.');
+ if(!window.JSZip)throw Error('The ZIP reader did not load. Reload this page while connected to the internet.');
+ const archive=await window.JSZip.loadAsync(file);
+ const entries=Object.values(archive.files).filter(item=>!item.dir&&!item.name.startsWith('__MACOSX/'));
+ const glb=entries.find(e=>/\.glb$/i.test(e.name));
+ if(glb){
+  const bytes=await glb.async('uint8array');
+  if(bytes.byteLength>185*1024*1024)throw Error('Model too large for this iPhone viewer.');
+  const blob=new Blob([bytes],{type:'model/gltf-binary'});
+  const url=URL.createObjectURL(blob);
+  try{return await loader.loadAsync(url)}finally{URL.revokeObjectURL(url)}
+ }
+ const entry=entries.find(e=>/\.gltf$/i.test(e.name));
+ if(!entry)throw Error('This ZIP has no .gltf or .glb model. Try the official GLTF download option.');
+ const dir=entry.name.includes('/')?entry.name.slice(0,entry.name.lastIndexOf('/')+1):'';
+ const urls=new Map(),revoked=[];
+ let total=0;
+ try{
+  for(const part of entries){
+   if(part===entry||/\.txt$|\.gltf$/i.test(part.name))continue;
+   const relative=part.name.startsWith(dir)?part.name.slice(dir.length):part.name;
+   if(!relative)continue;
+   const bytes=await part.async('uint8array');total+=bytes.byteLength;
+   if(total>200*1024*1024)throw Error('This model uses too much memory for the iPhone viewer.');
+   const ext=relative.toLowerCase().split('.').pop();
+   const mime=ext==='png'?'image/png':ext==='jpg'||ext==='jpeg'?'image/jpeg':ext==='webp'?'image/webp':'application/octet-stream';
+   const url=URL.createObjectURL(new Blob([bytes],{type:mime}));
+   revoked.push(url);
+   urls.set(relative.replace(/^\.?\//,''),url);
+   const fileName=relative.split('/').pop();if(!urls.has(fileName))urls.set(fileName,url);
+  }
+  const manager=new THREE.LoadingManager();
+  manager.setURLModifier(url=>{
+   const clean=decodeURIComponent(url.split(/[?#]/)[0]).replace(/^\.?\//,'');
+   return urls.get(clean)||urls.get(clean.split('/').pop())||url;
+  });
+  const gltfText=await entry.async('string');
+  return await new GLTFLoader(manager).parseAsync(gltfText,'');
+ }finally{for(const url of revoked)URL.revokeObjectURL(url)}
+}
+
+async function importFile(type,file){
+ if(!file)return;
+ report('Reading '+file.name+' locally…');
+ try{
+  const data=await parseLocalModel(file);
+  const model=normalize(data.scene,type);
+  const group=type==='bike'?bikeRoot:riderRoot;
+  group.clear();group.add(model);
+  if(type==='bike')bike=model;else rider=model;
+  const bones=[];model.traverse(o=>{if(o.isBone)bones.push(o)});
+  if(type==='rider')setRiderFit();
+  report((type==='bike'?'Honda':'Rider')+' loaded: '+file.name+'. '+(type==='rider'?bones.length+' skeleton bones found. A seated pose is not automatic.':'Touch GAS or AUTO RIDE to test the track.'));
+  if(type==='rider'&&!bones.length)report('Rider imported, but no animation skeleton was detected.');
+ }catch(error){console.warn(error);report('File not loaded: '+String(error.message||error));}
+}
+el('bikeFile').addEventListener('change',e=>importFile('bike',e.target.files?.[0]));
+el('riderFile').addEventListener('change',e=>importFile('rider',e.target.files?.[0]));
+for(const id of ['riderSize','riderY','riderZ'])el(id).addEventListener('input',setRiderFit);
+el('flipBike').onclick=()=>{bikeFlip*=-1};
+const modal=el('asset-modal');
+el('models').onclick=()=>{modal.hidden=false;state.auto=false};
+el('close-assets').onclick=()=>{modal.hidden=true};
+modal.addEventListener('click',e=>{if(e.target===modal)modal.hidden=true});
+function bindHold(id,key){
+ const btn=el(id);
+ const start=e=>{e.preventDefault();if(e.pointerId!==undefined)btn.setPointerCapture(e.pointerId);state[key]=true;btn.classList.add('held')};
+ const stop=e=>{state[key]=false;btn.classList.remove('held')};
+ btn.addEventListener('pointerdown',start);
+ ['pointerup','pointercancel','lostpointercapture','pointerleave'].forEach(n=>btn.addEventListener(n,stop));
+}
+for(const [id,key] of [['gas','gas'],['brake','brake'],['leanBack','back'],['leanFront','forward']])bindHold(id,key);
+window.addEventListener('keydown',e=>{
+ const map={ArrowRight:'gas',ArrowLeft:'brake',ArrowUp:'back',ArrowDown:'forward'};
+ if(map[e.key]){state[map[e.key]]=true;e.preventDefault()}
+});
+window.addEventListener('keyup',e=>{const map={ArrowRight:'gas',ArrowLeft:'brake',ArrowUp:'back',ArrowDown:'forward'};if(map[e.key])state[map[e.key]]=false});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){state.auto=false;state.gas=false;state.brake=false;state.back=false;state.forward=false}});
+setupScene();
+reset();
+window.FMX_RIDE={state,update,draw,reset,placeAt,toggleAutoplay,get hasBike(){return !!bike},get hasRider(){return !!rider}};
+el('play').textContent='▶ AUTO RIDE';
+</script></body></html>
