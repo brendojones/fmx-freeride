@@ -224,6 +224,8 @@ function animate(now){
 }
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 setView('bike');camera.position.set(-7,3,0);
+// Show the studio promptly while high-quality remote meshes continue loading.
+setTimeout(()=>el('loading').classList.add('hide'),2800);
 requestAnimationFrame(animate);
 Promise.allSettled([getAsset('bike',bikeAssets),loadVerifiedRider()]).then(results=>{
  el('loading').classList.add('hide');
