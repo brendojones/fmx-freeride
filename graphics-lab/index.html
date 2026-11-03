@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#0b151a">
-<title>FMX Visual Studio — Model Review 0.1</title>
+<title>FMX Visual Studio — Model Review 0.2</title>
 <style>
 :root{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#eef2ed;background:#0b151a}
 *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden}
@@ -41,7 +41,7 @@ h1 span{color:#ffab44}
 </head><body>
 <div id="stage"></div>
 <div id="loading"><div class="loadingcard"><div class="spinner"></div><b>Preparing the real 3D models</b><p>Graphics test only — no blocky stand-ins, no jumps, no gameplay.</p></div></div>
-<div class="topbar"><div><div class="eyebrow">Phase 01 · Artwork approval</div><h1>FMX <span>Visual Studio</span></h1><div class="lede">A fresh start. Real 3D assets. Just the bike and rider, judged on your iPhone.</div></div><div class="version">MODEL REVIEW 0.1<br>NOT GAMEPLAY</div></div>
+<div class="topbar"><div><div class="eyebrow">Phase 01 · Artwork approval</div><h1>FMX <span>Visual Studio</span></h1><div class="lede">A fresh start. Real 3D assets. Just the bike and rider, judged on your iPhone.</div></div><div class="version">MODEL REVIEW 0.2<br>NOT GAMEPLAY</div></div>
 <div id="notice" role="status"></div>
 <div class="bottom">
 <div class="panel">
@@ -162,6 +162,31 @@ async function getAsset(type,sources){
  setStatus(type,(type==='bike'?'Bike':'Rider')+': model unavailable','bad');
  return false;
 }
+// Resolve the actual published rigged-athlete file from the provider's
+// public model catalog; don't trust guessed .glb paths as the sole source.
+async function loadVerifiedRider(){
+ try{
+  const res=await fetch('https://models.codelove.in/catalog.json',{mode:'cors',cache:'force-cache'});
+  if(!res.ok)throw Error('Catalog HTTP '+res.status);
+  const catalog=await res.json();
+  const models=Array.isArray(catalog.models)?catalog.models:[];
+  const entry=models.find(m=>{
+   const data=String([m.id,m.slug,m.name,m.title,m.url,m.page,m.glb,m.path].filter(Boolean).join(' ')).toLowerCase();
+   return data.includes('sports-male-03') || data.includes('male athlete 03');
+  });
+  if(entry){
+   const file=entry.glb||entry.path||entry.file||entry.downloadUrl;
+   if(typeof file==='string'){
+    const assetUrl=new URL(file,catalog.url||'https://models.codelove.in/');
+    if(assetUrl.hostname==='models.codelove.in' && assetUrl.pathname.toLowerCase().endsWith('.glb')){
+     riderAssets.unshift({url:assetUrl.href,label:'MIT rigged athlete — catalog URL'});
+    }
+   }
+  }
+ }catch(error){console.warn('Public asset catalog unavailable; testing known file conventions instead',error)}
+ return getAsset('rider',riderAssets);
+}
+
 let view='bike',target=new THREE.Vector3(0,1,0),wantedTarget=target.clone(),angle=-Math.PI/2,
  elevation=.22,dist=6.8,wantedDist=6.8,pointers=new Map();
 function setView(v){
@@ -200,7 +225,7 @@ function animate(now){
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 setView('bike');camera.position.set(-7,3,0);
 requestAnimationFrame(animate);
-Promise.allSettled([getAsset('bike',bikeAssets),getAsset('rider',riderAssets)]).then(results=>{
+Promise.allSettled([getAsset('bike',bikeAssets),loadVerifiedRider()]).then(results=>{
  el('loading').classList.add('hide');
  if(!parts.bike&&!parts.rider){
   el('detail').style.display='block';el('detail').textContent='External model files did not load. No substitute blocky models are being shown. Please check connection or view the source asset pages.';
