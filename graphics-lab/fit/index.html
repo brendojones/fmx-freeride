@@ -46,6 +46,7 @@ input[type=range]{width:100%;accent-color:#ffaf5b;margin:6px 0 0}
 @media(max-width:620px){.fitting-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.version{display:none}nav{padding:6px}nav button{padding:10px 4px}}
 @media(orientation:landscape) and (max-height:500px){header{padding-top:5px;padding-bottom:4px}h1{font-size:19px}.kicker{font-size:8px}nav{padding:4px}nav button{padding:7px}.meta p{font-size:9px}footer{padding-top:5px;padding-bottom:5px}.fitting-controls{grid-template-columns:repeat(4,minmax(0,1fr))}input[type=range]{margin:1px 0}.file-input{padding:4px 7px}.control{padding:3px 7px}}
 </style>
+<script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head><body>
 <div id="app">
@@ -65,7 +66,7 @@ input[type=range]{width:100%;accent-color:#ffaf5b;margin:6px 0 0}
 </section>
 <section id="mount" class="view">
 <div id="mount-canvas"></div>
-<div id="empty"><b>Ready for the real 3D files</b><p>Load the licensed Honda and rider GLB files from your iPhone's Files app. No box-shaped substitute rider will appear.</p></div>
+<div id="empty"><b>Ready for the real 3D files</b><p>Load the downloaded Honda and rider 3D files from your iPhone. GLB and Sketchfab ZIP are supported. No fake rider will appear.</p></div>
 </section>
 </main>
 <footer>
@@ -79,8 +80,8 @@ input[type=range]{width:100%;accent-color:#ffaf5b;margin:6px 0 0}
 </div>
 <div id="fitting">
 <div class="file-bar">
-<label class="file-input"><span>🏍</span><span><strong>LOAD HONDA .GLB</strong><small id="bike-name">Tap to choose a 3D model</small></span><input id="bikeFile" type="file" accept=".glb,model/gltf-binary"></label>
-<label class="file-input"><span>🪖</span><span><strong>LOAD RIDER .GLB</strong><small id="rider-name">Use an authorised rider file</small></span><input id="riderFile" type="file" accept=".glb,model/gltf-binary"></label>
+<label class="file-input"><span>🏍</span><span><strong>LOAD HONDA 3D</strong><small id="bike-name">Tap to choose a 3D model</small></span><input id="bikeFile" type="file" accept=".glb,.zip,model/gltf-binary,application/zip"></label>
+<label class="file-input"><span>🪖</span><span><strong>LOAD RIDER 3D</strong><small id="rider-name">Use an authorised rider file</small></span><input id="riderFile" type="file" accept=".glb,.zip,model/gltf-binary,application/zip"></label>
 <a class="cta" style="align-self:center" href="https://www.cgtrader.com/3d-models/character/man/motocross-rider-rigged" target="_blank" rel="noopener">RIDER MODEL</a>
 </div>
 <div class="fitting-controls">
@@ -89,7 +90,7 @@ input[type=range]{width:100%;accent-color:#ffaf5b;margin:6px 0 0}
 <div class="control"><label for="forward">Fore / aft <output id="forwardVal">0.00</output></label><input id="forward" type="range" min="-.95" max=".95" step=".01" value="0"></div>
 <div class="control"><label for="turn">Rider turn <output id="turnVal">0°</output></label><input id="turn" type="range" min="-180" max="180" step="5" value="0"></div>
 </div>
-<div id="fileStatus" role="status">This viewer loads local GLB files without uploading them to a server. Choose the actual 3D assets to inspect size and alignment.</div>
+<div id="fileStatus" role="status">This viewer reads .GLB or Sketchfab .ZIP downloads locally on your iPhone. Files stay on your device.</div>
 <div class="note">Important: fitting is for scale and placement. An FBX/GLB rider in T-pose still needs proper skeletal posing for hands on bars, bent knees and freestyle animations.</div>
 </div>
 </footer>
@@ -174,25 +175,73 @@ function updatePose(){
  for(const id of ['sizing','seat','forward','turn'])el(id+'Val').textContent=id==='turn'?el(id).value+'°':Number(el(id).value).toFixed(2);
 }
 for(const key of ['sizing','seat','forward','turn'])el(key).addEventListener('input',updatePose);
+// Read a locally selected self-contained GLB or Sketchfab-exported glTF ZIP.
+// File contents are never transferred to the server, and source attribution
+// still needs to be retained before publishing a game.
+async function parseLocalModel(file){
+ if(/\.glb$/i.test(file.name)){
+  const url=URL.createObjectURL(file);
+  try{return await loader.loadAsync(url)}finally{URL.revokeObjectURL(url)}
+ }
+ if(!/\.zip$/i.test(file.name))throw Error('Choose a GLB or a model ZIP downloaded from Sketchfab.');
+ if(file.size>130*1024*1024)throw Error('This archive is too large for the iPhone viewer. Optimise it first.');
+ if(!window.JSZip)throw Error('The ZIP reader did not load. Reload this page while connected to the internet.');
+ const archive=await window.JSZip.loadAsync(file);
+ const entries=Object.values(archive.files).filter(item=>!item.dir&&!item.name.startsWith('__MACOSX/'));
+ const glb=entries.find(e=>/\.glb$/i.test(e.name));
+ if(glb){
+  const bytes=await glb.async('uint8array');
+  if(bytes.byteLength>185*1024*1024)throw Error('Model too large for this iPhone viewer.');
+  const blob=new Blob([bytes],{type:'model/gltf-binary'});
+  const url=URL.createObjectURL(blob);
+  try{return await loader.loadAsync(url)}finally{URL.revokeObjectURL(url)}
+ }
+ const entry=entries.find(e=>/\.gltf$/i.test(e.name));
+ if(!entry)throw Error('This ZIP has no .gltf or .glb model. Try the official GLTF download option.');
+ const dir=entry.name.includes('/')?entry.name.slice(0,entry.name.lastIndexOf('/')+1):'';
+ const urls=new Map(),revoked=[];
+ let total=0;
+ try{
+  for(const part of entries){
+   if(part===entry||/\.txt$|\.gltf$/i.test(part.name))continue;
+   const relative=part.name.startsWith(dir)?part.name.slice(dir.length):part.name;
+   if(!relative)continue;
+   const bytes=await part.async('uint8array');total+=bytes.byteLength;
+   if(total>200*1024*1024)throw Error('This model uses too much memory for the iPhone viewer.');
+   const ext=relative.toLowerCase().split('.').pop();
+   const mime=ext==='png'?'image/png':ext==='jpg'||ext==='jpeg'?'image/jpeg':ext==='webp'?'image/webp':'application/octet-stream';
+   const url=URL.createObjectURL(new Blob([bytes],{type:mime}));
+   revoked.push(url);
+   urls.set(relative.replace(/^\.?\//,''),url);
+   const fileName=relative.split('/').pop();if(!urls.has(fileName))urls.set(fileName,url);
+  }
+  const manager=new THREE.LoadingManager();
+  manager.setURLModifier(url=>{
+   const clean=decodeURIComponent(url.split(/[?#]/)[0]).replace(/^\.?\//,'');
+   return urls.get(clean)||urls.get(clean.split('/').pop())||url;
+  });
+  const gltfText=await entry.async('string');
+  return await new GLTFLoader(manager).parseAsync(gltfText,'');
+ }finally{for(const url of revoked)URL.revokeObjectURL(url)}
+}
 async function takeFile(type,file){
  if(!file)return;if(!booted)bootStudio();
- if(!/\.glb$/i.test(file.name)){report('Please choose a self-contained .glb file, not a ZIP or an FBX.',true);return}
- const url=URL.createObjectURL(file);
- report('Loading the actual '+type+' model…');el(type+'-name').textContent=file.name;
+ if(!/\.(glb|zip)$/i.test(file.name)){report('Please choose a GLB file or Sketchfab model ZIP.',true);return}
+ report('Loading your real '+type+' model from Files…');
+ el(type+'-name').textContent=file.name;
  try{
-  const gltf=await loader.loadAsync(url);
+  const gltf=await parseLocalModel(file);
   const obj=centreAndFit(gltf.scene,type);
   const root=type==='bike'?rootBike:rootRider;
   root.clear();root.add(obj);
   if(type==='bike')modelBike=obj;else modelRider=obj;
-  el('empty').style.display='none';
-  updatePose();
-  const boneInfo={bones:0,skinned:0};
-  obj.traverse(o=>{if(o.isBone)boneInfo.bones++;if(o.isSkinnedMesh)boneInfo.skinned++});
-  const rigText=type==='rider'?(boneInfo.bones?'Skeleton detected: '+boneInfo.bones+' bones.':'No character skeleton detected — trick animation will require rigging.'):'Bike geometry loaded.';
-  report((modelBike&&modelRider?'Both assets loaded. Adjust rider scale and position. ':'Loaded '+type+'. ')+rigText);
- }catch(error){console.warn(error);report('Could not open this model: '+String(error.message||error),true)}
- finally{URL.revokeObjectURL(url)}
+  el('empty').style.display='none';updatePose();
+  let bones=0;let skinned=0;
+  obj.traverse(o=>{if(o.isBone)bones++;if(o.isSkinnedMesh)skinned++});
+  let result=(modelBike&&modelRider?'Both actual 3D files loaded. Adjust the rider\'s fit. ':'Loaded the '+type+' model. ');
+  if(type==='rider')result+=bones&&skinned?'Skeleton detected ('+bones+' bones). A proper motocross riding animation is still required.':'No rider skeleton detected — animation rigging is still required.';
+  report(result);
+ }catch(error){console.warn(error);report('Could not load your model: '+String(error.message||error),true)}
 }
 el('bikeFile').addEventListener('change',e=>takeFile('bike',e.target.files?.[0]));
 el('riderFile').addEventListener('change',e=>takeFile('rider',e.target.files?.[0]));
