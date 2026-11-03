@@ -125,7 +125,7 @@ const fitControls=['sizing','seat','forward','turn'];
 function enableReview(){
  const ready=!!(modelBike&&modelRider);
  el('save-fit').disabled=!ready;
- el('capture').disabled=!ready;
+ el('capture').disabled=!(modelBike||modelRider);
 }
 function downloadLocalFile(blob,name){
  const url=URL.createObjectURL(blob);
