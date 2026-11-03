@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111b20">
+<title>FMX Fit Studio — Bike & Rider</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,sans-serif;background:#0c161b;color:#edf2ed}
+*{box-sizing:border-box}html,body{margin:0;height:100%;height:100dvh;overflow:hidden}
+button,input{font:inherit}button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#app{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+header{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;background:#14242b;padding:max(9px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left));border-bottom:1px solid #ffffff28}
+.kicker{font-size:10px;letter-spacing:.14em;font-weight:900;color:#f5b46d}
+h1{font-size:clamp(21px,3.6vw,30px);letter-spacing:-.04em;margin:1px 0 0}
+h1 em{color:#f7b567;font-style:normal}
+.version{font-size:10px;color:#c2d1cf;text-align:right}
+nav{display:flex;flex:none;gap:7px;background:#0f1c22;padding:8px max(10px,env(safe-area-inset-left))}
+nav button{flex:1;background:#213137;border:1px solid #edf5ec2b;color:#e2e9e5;padding:11px 7px;border-radius:11px;font-weight:800;font-size:clamp(10px,2.5vw,13px)}
+nav button.active{background:#f7b465;color:#182024;border-color:#f7c998}
+#viewport{flex:1;position:relative;min-height:0;background:linear-gradient(#85a3ae,#b6b8a9)}
+.view{display:none;position:absolute;inset:0}
+.view.active{display:block}
+iframe{width:100%;height:100%;display:block;border:0;background:#22323a}
+#mount-canvas{display:block;width:100%;height:100%;touch-action:none}
+#empty{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);text-align:center;border-radius:18px;background:#111f27db;border:1px solid #ffffff32;padding:19px 23px;max-width:280px;pointer-events:none}
+#empty b{display:block;color:#f9ba72;margin-bottom:7px}#empty p{margin:0;font-size:12px;line-height:1.5;color:#d5e0df}
+#hint{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);border-radius:20px;background:#0c171bcb;color:#dce6e2;border:1px solid #ffffff24;padding:7px 13px;font-size:11px;white-space:nowrap;pointer-events:none}
+footer{background:#102028;border-top:1px solid #ffffff20;flex:none;max-height:40dvh;overflow-y:auto;padding:8px max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.meta{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.meta h2{font-size:13px;margin:0;color:#f8ead7}
+.meta p{font-size:11px;color:#b6c6c7;margin:4px 0 0;line-height:1.4}
+.cta{display:inline-block;border:1px solid #f3bb7d;background:#f1af69;color:#1b2525;padding:9px 11px;border-radius:9px;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:900}
+#fitting{display:none}
+.file-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch}
+.file-input{flex:1;min-width:140px;border:1px dashed #e0e6dc55;border-radius:11px;padding:7px 10px;display:flex;align-items:center;gap:9px;font-size:11px;color:#f5c590;cursor:pointer}
+.file-input strong{display:block;font-size:12px;color:#f3f2e9}
+.file-input small{display:block;color:#a5b7b5;margin-top:3px;max-width:185px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-input input{width:1px;height:1px;opacity:0;position:absolute}
+.fitting-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:7px}
+.control{background:#1b3034;border-radius:8px;padding:5px 9px}
+.control label{display:flex;justify-content:space-between;align-items:center;font-size:10px;gap:4px;color:#ccd3cf}
+.control output{color:#f8c789;font-weight:800}
+input[type=range]{width:100%;accent-color:#ffaf5b;margin:6px 0 0}
+#fileStatus{font-size:10px;color:#b6c4c2;line-height:1.4;margin-top:7px}
+#fileStatus.error{color:#ffaaa2}
+#fitting .note{font-size:10px;color:#f7ca94;margin-top:6px}
+@media(max-width:620px){.fitting-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.version{display:none}nav{padding:6px}nav button{padding:10px 4px}}
+@media(orientation:landscape) and (max-height:500px){header{padding-top:5px;padding-bottom:4px}h1{font-size:19px}.kicker{font-size:8px}nav{padding:4px}nav button{padding:7px}.meta p{font-size:9px}footer{padding-top:5px;padding-bottom:5px}.fitting-controls{grid-template-columns:repeat(4,minmax(0,1fr))}input[type=range]{margin:1px 0}.file-input{padding:4px 7px}.control{padding:3px 7px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head><body>
+<div id="app">
+<header><div><div class="kicker">Fresh build · Step 02 · Artwork fit</div><h1>FMX <em>RIDER STUDIO</em></h1></div><div class="version">iPhone visual test<br>Not gameplay yet</div></header>
+<nav>
+<button class="active" data-tab="posed" aria-pressed="true">RIDING POSITION</button>
+<button data-tab="honda" aria-pressed="false">OUR HONDA</button>
+<button data-tab="mount" aria-pressed="false">FIT OUR MODELS</button>
+</nav>
+<main id="viewport">
+<section id="posed" class="view active">
+<iframe id="poseEmbed" title="3D reference of a detailed motorcycle and a rider mounted together" src="https://sketchfab.com/models/bb55f56ddaa04cbdb9cca1f6c262d042/embed?autostart=1&ui_infos=0&ui_hint=0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen loading="eager"></iframe>
+<div id="hint">Rotate the reference rider and bike with your finger</div>
+</section>
+<section id="honda" class="view">
+<iframe title="3D reference of the Honda CRF450 motocross bike" src="about:blank" data-src="https://sketchfab.com/models/c80f0e732e844580af412958c9d67315/embed?autostart=1&ui_infos=0&ui_hint=0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen loading="lazy"></iframe>
+</section>
+<section id="mount" class="view">
+<div id="mount-canvas"></div>
+<div id="empty"><b>Ready for the real 3D files</b><p>Load the licensed Honda and rider GLB files from your iPhone's Files app. No box-shaped substitute rider will appear.</p></div>
+</section>
+</main>
+<footer>
+<div id="posed-info" class="meta">
+<div><h2>Riding-position reference</h2><p>A detailed enduro rider already mounted on a bike. Use this for proportions and posture — it's not our Honda or our game artwork.</p></div>
+<a class="cta" href="https://sketchfab.com/3d-models/dirt-bike-enduro-rider-bb55f56ddaa04cbdb9cca1f6c262d042" target="_blank" rel="noopener">SOURCE</a>
+</div>
+<div id="honda-info" class="meta" style="display:none">
+<div><h2>Honda CRF450 — our approved bike look</h2><p>Jacobdesigns · Free CC BY 3D model · Sketchfab provides the official downloadable model.</p></div>
+<a class="cta" href="https://sketchfab.com/3d-models/free-honda-crf-450-c80f0e732e844580af412958c9d67315" target="_blank" rel="noopener">GET HONDA</a>
+</div>
+<div id="fitting">
+<div class="file-bar">
+<label class="file-input"><span>🏍</span><span><strong>LOAD HONDA .GLB</strong><small id="bike-name">Tap to choose a 3D model</small></span><input id="bikeFile" type="file" accept=".glb,model/gltf-binary"></label>
+<label class="file-input"><span>🪖</span><span><strong>LOAD RIDER .GLB</strong><small id="rider-name">Use an authorised rider file</small></span><input id="riderFile" type="file" accept=".glb,model/gltf-binary"></label>
+<a class="cta" style="align-self:center" href="https://www.cgtrader.com/3d-models/character/man/motocross-rider-rigged" target="_blank" rel="noopener">RIDER MODEL</a>
+</div>
+<div class="fitting-controls">
+<div class="control"><label for="sizing">Rider scale <output id="sizingVal">1.00</output></label><input id="sizing" type="range" min=".75" max="1.25" step=".01" value="1"></div>
+<div class="control"><label for="seat">Rider height <output id="seatVal">0.25</output></label><input id="seat" type="range" min="-.25" max="1.2" step=".01" value=".25"></div>
+<div class="control"><label for="forward">Fore / aft <output id="forwardVal">0.00</output></label><input id="forward" type="range" min="-.95" max=".95" step=".01" value="0"></div>
+<div class="control"><label for="turn">Rider turn <output id="turnVal">0°</output></label><input id="turn" type="range" min="-180" max="180" step="5" value="0"></div>
+</div>
+<div id="fileStatus" role="status">This viewer loads local GLB files without uploading them to a server. Choose the actual 3D assets to inspect size and alignment.</div>
+<div class="note">Important: fitting is for scale and placement. An FBX/GLB rider in T-pose still needs proper skeletal posing for hands on bars, bent knees and freestyle animations.</div>
+</div>
+</footer>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+const el=id=>document.getElementById(id);
+let renderer,scene,camera,controls,rootBike,rootRider,currentTab='posed';
+let modelBike=null,modelRider=null,booted=false;
+const loader=new GLTFLoader();
+function setTab(name){
+ currentTab=name;
+ document.querySelectorAll('[data-tab]').forEach(b=>{const yes=b.dataset.tab===name;b.classList.toggle('active',yes);b.setAttribute('aria-pressed',String(yes))});
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===name));
+ el('posed-info').style.display=name==='posed'?'flex':'none';
+ el('honda-info').style.display=name==='honda'?'flex':'none';
+ el('fitting').style.display=name==='mount'?'block':'none';
+ if(name==='honda'){const f=el('honda').querySelector('iframe');if(f.src.endsWith('/about:blank')||f.getAttribute('src')==='about:blank')f.src=f.dataset.src;}
+ if(name==='mount'&&!booted)bootStudio();
+ if(name==='mount')setTimeout(resize,50);
+}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+function bootStudio(){
+ if(booted)return;booted=true;
+ scene=new THREE.Scene();scene.background=new THREE.Color('#98b3b9');scene.fog=new THREE.Fog('#98b3b9',16,45);
+ camera=new THREE.PerspectiveCamera(42,1,.08,120);
+ renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+ renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6));
+ renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+ renderer.toneMappingExposure=1.07;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ el('mount-canvas').appendChild(renderer.domElement);
+ scene.add(new THREE.HemisphereLight(0xe6f6ff,0x566255,1.8));
+ const sun=new THREE.DirectionalLight(0xffe1bf,3.3);sun.position.set(-4,8,3.5);sun.castShadow=true;
+ sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-7;sun.shadow.camera.right=7;sun.shadow.camera.top=7;sun.shadow.camera.bottom=-7;sun.shadow.normalBias=.025;scene.add(sun);
+ const rim=new THREE.DirectionalLight(0xb5daef,1.2);rim.position.set(6,4,-4);scene.add(rim);
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(35,35),new THREE.MeshStandardMaterial({color:'#797e78',roughness:1}));
+ floor.rotation.x=-Math.PI/2;floor.position.y=-.02;floor.receiveShadow=true;scene.add(floor);
+ rootBike=new THREE.Group();rootRider=new THREE.Group();scene.add(rootBike,rootRider);
+ controls=new OrbitControls(camera,renderer.domElement);controls.enablePan=false;controls.enableDamping=true;controls.dampingFactor=.085;
+ controls.minDistance=2.6;controls.maxDistance=13;controls.maxPolarAngle=Math.PI*.58;
+ controls.target.set(0,1.0,0);camera.position.set(7.2,3.1,.55);controls.update();
+ resize();requestAnimationFrame(animate);
+}
+function resize(){
+ if(!renderer)return;const holder=el('mount');
+ if(holder.clientWidth<1||holder.clientHeight<1)return;
+ const w=holder.clientWidth,h=holder.clientHeight;
+ renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+}
+window.addEventListener('resize',resize);
+function animate(){requestAnimationFrame(animate);if(currentTab!=='mount')return;controls.update();renderer.render(scene,camera)}
+function report(message,isError=false){el('fileStatus').textContent=message;el('fileStatus').classList.toggle('error',isError)}
+function axesForBike(model){
+ const bb=new THREE.Box3().setFromObject(model),size=bb.getSize(new THREE.Vector3());
+ const dimensions=[size.x,size.y,size.z],sorted=[0,1,2].sort((a,b)=>dimensions[a]-dimensions[b]);
+ const axes=[new THREE.Vector3(),new THREE.Vector3(),new THREE.Vector3()];
+ axes[sorted[0]].set(1,0,0);axes[sorted[1]].set(0,1,0);axes[sorted[2]].set(0,0,1);
+ const basis=new THREE.Matrix4().makeBasis(...axes);
+ if(basis.determinant()<0){axes[sorted[0]].multiplyScalar(-1);basis.makeBasis(...axes)}
+ model.applyMatrix4(basis);model.updateMatrixWorld(true);
+}
+function centreAndFit(model,type){
+ model.updateMatrixWorld(true);
+ if(type==='bike')axesForBike(model);
+ const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3());
+ if(!(size.y>.05&&size.z>.05))throw Error('The selected GLB has invalid model dimensions.');
+ const baseScale=type==='bike'?2.4/size.z:1.71/size.y;
+ model.scale.multiplyScalar(baseScale);model.updateMatrixWorld(true);
+ const b=new THREE.Box3().setFromObject(model),centre=b.getCenter(new THREE.Vector3());
+ model.position.sub(new THREE.Vector3(centre.x,b.min.y,centre.z));
+ model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+ return model;
+}
+function updatePose(){
+ if(!rootRider)return;
+ const scale=Number(el('sizing').value),y=Number(el('seat').value),z=Number(el('forward').value),angle=Number(el('turn').value);
+ rootRider.scale.setScalar(scale);
+ rootRider.position.set(0,y,z);
+ rootRider.rotation.y=THREE.MathUtils.degToRad(angle);
+ for(const id of ['sizing','seat','forward','turn'])el(id+'Val').textContent=id==='turn'?el(id).value+'°':Number(el(id).value).toFixed(2);
+}
+for(const key of ['sizing','seat','forward','turn'])el(key).addEventListener('input',updatePose);
+async function takeFile(type,file){
+ if(!file)return;if(!booted)bootStudio();
+ if(!/\.glb$/i.test(file.name)){report('Please choose a self-contained .glb file, not a ZIP or an FBX.',true);return}
+ const url=URL.createObjectURL(file);
+ report('Loading the actual '+type+' model…');el(type+'-name').textContent=file.name;
+ try{
+  const gltf=await loader.loadAsync(url);
+  const obj=centreAndFit(gltf.scene,type);
+  const root=type==='bike'?rootBike:rootRider;
+  root.clear();root.add(obj);
+  if(type==='bike')modelBike=obj;else modelRider=obj;
+  el('empty').style.display='none';
+  updatePose();
+  const boneInfo={bones:0,skinned:0};
+  obj.traverse(o=>{if(o.isBone)boneInfo.bones++;if(o.isSkinnedMesh)boneInfo.skinned++});
+  const rigText=type==='rider'?(boneInfo.bones?'Skeleton detected: '+boneInfo.bones+' bones.':'No character skeleton detected — trick animation will require rigging.'):'Bike geometry loaded.';
+  report((modelBike&&modelRider?'Both assets loaded. Adjust rider scale and position. ':'Loaded '+type+'. ')+rigText);
+ }catch(error){console.warn(error);report('Could not open this model: '+String(error.message||error),true)}
+ finally{URL.revokeObjectURL(url)}
+}
+el('bikeFile').addEventListener('change',e=>takeFile('bike',e.target.files?.[0]));
+el('riderFile').addEventListener('change',e=>takeFile('rider',e.target.files?.[0]));
+</script></body></html>
