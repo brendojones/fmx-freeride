@@ -1,29 +1,27 @@
-# FMX Visual Studio — graphics-first rebuild
+# FMX Visual Studio — real motocross model selection
 
-**Purpose:** start fresh, separate from the older browser games. Compare the quality of licensed 3D motorcycle and rider assets on an iPhone before working on gameplay, jump designs or trick animations.
+**Purpose:** review the appearance of genuine motocross bike meshes on an iPhone before adding anything to the game. **This is not a playable game or a bundled GLB asset.**
 
-## Open the graphics test
+## Open the corrected preview
 
 https://brendojones.github.io/fmx-freeride/graphics-lab/
 
-Touch controls: select THE BIKE / THE RIDER / SIDE BY SIDE, drag to rotate, pinch to zoom. This is an **artwork inspection tool**, not a playable game. No keyboard-based controls were added.
+- **Honda CRF450**: [2022 Honda CRF450 by Jacobdesigns](https://sketchfab.com/3d-models/free-honda-crf-450-c80f0e732e844580af412958c9d67315), ~180,000 triangles, publisher says rigged, free Sketchfab download, **Creative Commons Attribution (CC BY)**.
+- **Yamaha YZ450F**: [2022 YZ450F by Res1n](https://sketchfab.com/3d-models/2022-yamaha-yz450f-dfff1637219f44d6bfa3ed3c9708d523), ~180,000 triangles, free Sketchfab download, **Creative Commons Attribution (CC BY)**.
 
-## Actual assets attempted
+These are **genuine motocross race bike models**, not the generic motorcycle / trials bike originally used. The selection buttons swap between official public Sketchfab interactive **3D embeds**. The original creator links are provided on the page, so users can verify appearance and credit.
 
-1. **Detailed dirt motorcycle**, Innerscene — original unbranded public-domain CC0 asset, ~6.7 MB, real scale. Source: https://www.innerscene.com/tools/library/3d-parts/dirt-motorcycle-0a9c8589 . Direct URL used: https://www.innerscene.com/api/library/dirt-motorcycle-0a9c8589/download . Direct cross-origin loading and iPhone performance are not independently verified.
-2. **Mobile fallback motorcycle**, 3DAssets.dev — CC0 trials competition bike, 6,288 triangles, ~308 KB, permanent CORS-enabled direct URL https://cdn.3dassets.dev/assets/15417/v1/model.glb . Source: https://3dassets.dev/assets/motorcycle-racing-and-street-bikes-trials-bike-5643520e . This is a **trials bike**, not final MX bike artwork.
-3. **Rigged athlete trial**, CodeLove Male Athlete 03 — MIT license, 80 bone skeleton, 9,534 tris, 785 KB, real 3D asset. Published source: https://models.codelove.in/models/sports-male-03/ . **CAUTION:** The viewer now first reads the publisher's CORS-enabled public `catalog.json` and attempts to load the athlete's published direct GLB URL from the catalog. If that lookup fails, it tries two unverified URL conventions and then clearly reports failure. Live loading on an iPhone remains unverified. If this model is eventually bundled, retain the asset's MIT copyright and license text.
-4. The rider is NOT wearing a proper motocross helmet or MX gear yet and is NOT in a fitted riding pose. These are later modelling/rigging steps after we select a convincing base model. Do not present it as finished FMX character art.
+### What this update does and does not do
 
-## Principles
+- It does **show published 3D motocross bike models** from the owners' source pages, if Sketchfab embeds load in Safari.
+- It does **not** download, rehost or integrate the models into our own Three.js game yet. The next step after choosing the bike is to obtain its downloadable GLB/GLTF via the official source, retain the artist's CC BY credit, and check real iPhone performance and file size.
+- The earlier trial of generic dirt motorcycle and rigged athlete is preserved separately as [previous model review](./previous-model-review.html).
+- Other games `../index.html`, `../side-on/index.html`, `../side-on-v2/index.html` are unchanged.
+- A convincing **motocross rider in gear** remains a separate asset and animation challenge. No procedural rider is passed off as professional character art.
+- A branded bike model's visual preview doesn't imply trademark licensing for a commercial game. Consider removing brands or obtaining additional permissions for production.
 
-- **No fabricated box/capsule bike or rider** when the real model fails to load. Failure must be visible.
-- This first prototype features neutral studio lighting, floor shadows, model rotation and zoom; no jumps, tracks or trick physics.
-- The older playable prototypes are unchanged: `../index.html`, `../side-on/index.html`, `../side-on-v2/index.html`.
-- We need screenshots from an **actual iPhone** to verify load, silhouette, model orientation, character, texture, frame rate and whether this is substantially closer to Mad Skills Motocross 3 visual quality.
-- No purchased or copyrighted commercial-game assets may be added without the proper permissions.
-- The next work after art review is source a genuine detailed motocross helmet/gear and fit/animate the rider with skeletal poses, then choose the motorcycle that looks right and optimize for iPhone.
+## Usage
 
-## Current status
+Open on iPhone; choose Honda or Yamaha, rotate / zoom the bike in the embedded Sketchfab 3D viewer. If embedded media is blocked, select **OPEN ORIGINAL** to inspect it directly on Sketchfab. Leave feedback on whether the chosen bike is visually appropriate.
 
-HTML and JavaScript committed (Model Review 0.2, including dynamic public-catalog rider resolution), but no live render/device verification by the assistant. If neither athlete link works, select a verified direct CORS GLB or add a licensed rider to the project as a bundled file; don't replace with procedural primitives.
+No money has been spent or paid asset purchased. The aim is visual quality approval before game programming.
