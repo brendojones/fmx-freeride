@@ -68,7 +68,7 @@ button:active{transform:scale(.98)}
 <div class="go">
 <button class="primary" id="play" aria-pressed="false">▶ RIDE</button>
 <input type="range" id="progress" min="0" max="420" step=".1" value="0" aria-label="Move through the motocross course">
-<button id="speed" aria-label="Change camera speed">1× SPEED</button>
+<button id="speed" aria-label="Change automatic throttle power">1× POWER</button>
 <button id="models" class="asset-btn">LOAD 3D</button>
 <button id="reset">↺ RESET</button>
 </div>
@@ -557,7 +557,7 @@ $("play").onclick=()=>{
 };
 $("speed").onclick=()=>{
  const options=[.5,1,1.5,2];st.speed=options[(options.indexOf(st.speed)+1)%options.length];
- $("speed").textContent=st.speed+"× SPEED";$("pace").textContent="CAMERA · "+st.speed+"×";
+ $("speed").textContent=st.speed+"× POWER";$("pace").textContent="AUTO POWER · "+st.speed+"×";
 };
 $("reset").onclick=()=>{
  setPlay(false);st.x=st.desiredX=5;cameraY=0;
@@ -631,8 +631,17 @@ let bike=null,rider=null,renderer=null,scene=null,cam=null,lastSceneWidth=0,last
 const WB=2.7,gravity=26,MAX_SPEED=27;
 // These are game-prototype coordinates, not calibrated real metres.
 const surface=x=>Math.max(T.height(x),T.steelHeight(x));
-const groundAt=x=>(surface(x-WB*.5)+surface(x+WB*.5))/2;
+const groundAt=x=>{
+ // Stay on the curved deck up to the takeoff tip. Averaging the front wheel
+ // beyond the edge would artificially drop the bike through the steel ramp.
+ if(x>=132&&x<=160)return T.rampProfile(x);
+ return (surface(x-WB*.5)+surface(x+WB*.5))/2;
+};
 function groundPitch(x){
+ if(x>=132&&x<=160){
+  const near=T.clamp(x,132.2,159.8),delta=.18;
+  return Math.atan((T.rampProfile(near+delta)-T.rampProfile(near-delta))/(2*delta));
+ }
  return Math.atan2(surface(x+WB*.5)-surface(x-WB*.5),WB);
 }
 function setInfo(msg){el('fileStatus').textContent=msg;}
@@ -661,7 +670,7 @@ function step(dt){
  if(state.crashed){state.speed=Math.max(0,state.speed-dt*12);return}
  const go=state.gas||state.auto,slow=state.brake;
  const slope=T.clamp(groundPitch(state.x),-.95,.95);
- const accel=go?12:0;
+ const accel=go?12*(state.auto?T.st.speed:1):0;
  state.speed=T.clamp(state.speed+(accel-(slow?21:0)-(.66+state.speed*.022)-(!state.air?Math.sin(slope)*8:0))*dt,0,MAX_SPEED);
  const oldx=state.x;
  state.x=T.clamp(state.x+state.speed*dt,4,T.LENGTH-2);
