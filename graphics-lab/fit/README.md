@@ -18,6 +18,20 @@ This is a separate visual fitting tool. It does not change any existing games, a
 - Do not publish third-party model files in GitHub without checking the licence terms and retaining required attribution.
 - iPhone device rendering and Sketchfab iframe loading have not been independently verified.
 
+## iPhone downloading and fitting — November 2026
+
+Sketchfab's own Download API requires a logged-in user's authorisation; free CC BY models are **not** anonymous direct GLB links. Never use a site ripper or bypass authentication.
+
+1. Open the **Fit Our Models** tab and tap **OPEN HONDA DOWNLOAD**.
+2. In Sketchfab sign in with a free account, tap **Download 3D Model**, and select **glTF**. Save the provided ZIP unchanged to the iPhone Files app.
+3. Return to **Fit Our Models** and tap **LOAD HONDA 3D**, selecting the saved ZIP. The WebGL scene reads it locally; no upload.
+4. When an appropriately licensed rider 3D file is acquired, load its GLB/Sketchfab ZIP in **LOAD RIDER 3D**.
+5. Adjust the four placement sliders, then select **SAVE FIT SETTINGS** (a JSON containing only positioning and filenames) and **SAVE PREVIEW PHOTO** (a PNG screenshot from the studio).
+
+The site now provides the official source links, download notes, and screenshot/fit export directly on iPhone. This is **not** an automatic download from Sketchfab. Its authentication requirement can't be bypassed by the assistant. The earlier chosen Hisenberg CGTrader asset is listed as "Royalty Free License (no AI)", so the full licence and AI-assisted usage permissions should be checked before purchase or import. No purchase has been made.
+
+The CC BY free "Low-poly Motocross Character (rigged)" is only 1,700 triangles and is intentionally not silently substituted. Another free CC BY "MX-Rider" model is about 1.5 million triangles, much too heavy for mobile without authoring/decimation and not confirmed as rigged. Neither is automatically suitable for this graphics-first approach.
+
 ## Next art milestone
 
 Obtain properly licensed downloadable Honda and rider files; inspect their geometry and skeleton; fit a seated and standing pose with hands on handlebars and boots on pegs. Share an actual iPhone screenshot for art review before building jumps or gameplay.
